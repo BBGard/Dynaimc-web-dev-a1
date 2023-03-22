@@ -144,7 +144,7 @@ h2 {
 }
 
 h3 {
-  font-size: clamp(2rem, 5vw, 2.5rem);
+  font-size: clamp(1.2rem, 5vw, 1.6rem);
   font-weight: 500;
 }
 
@@ -391,6 +391,7 @@ input, button, select, textarea {
   text-align: center;
 }
 
+
 #new-thread-butt {
   display: block;
   margin: 0 auto;
@@ -425,12 +426,22 @@ input, button, select, textarea {
 
 #latest-posts ul li {
   padding: 0.75rem 2rem;
-  font-size: 1.1rem;
-  font-weight: 500;
   border: solid 1px var(--color-blue);
   border-bottom: none;
   background-color: var(--color-offwhite);
+}
 
+/* Post title */
+#latest-posts ul li a {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+/* Author name */
+#latest-posts ul li p {
+  font-size: 0.8rem;
+  color: var(--color-darkblue);
+  text-align: right;
 }
 
 /* Add border to bottom of last post */

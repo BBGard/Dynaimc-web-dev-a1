@@ -39,7 +39,7 @@ document.querySelector('form').addEventListener('submit', (event) => {
     })
     .catch(error => console.log(error));
 
-  event.preventDefault(); // Prevent default action
+  event.preventDefault();
 }, false);
 
 // Hides login and displays forum page
@@ -75,8 +75,22 @@ let thread_object;
 
 
 /* --------------------------- Forum Functions ------------------------------- */
-// Try Fetch posts
+// Try to fetch posts
 function fetchPosts() {
+  //   console.log("Fetching threads");
+  //   fetch('http://localhost:7777/api/threads')
+  //     .then(response => {
+  //       if (!response.ok) {
+  //         // Catches any http 4xx or 5xx errors
+  //         throw new Error("Error fetching threads. Check the address or connection.");
+  //       }
+  //       else {
+  //         return response.json();
+  //       }
+  //     })
+  //     .then(jsonData => populateThreadList(jsonData))
+  //     .catch(error => console.log(error));
+  // }
   console.log("Fetching threads");
   fetch('http://localhost:7777/api/threads')
     .then(response => {
@@ -95,21 +109,53 @@ function fetchPosts() {
 // Populate the thread list with the fetched posts
 function populateThreadList(data) {
   console.log("Populating thread_list");
-  // console.log(data);
-  //console.log(`Last timestamp: ${last_update}, current timestamp: ${data.createdAt}`);
 
-  if(thread_object === null || thread_object === undefined) {
-    console.log("Empty object");
-  }
-
+  // TODO: Set id on post equal to id in API
   for (let element of data) {
-    let li = document.createElement('li')   // Create list element to hold title of post
-    let link = document.createElement('a'); // Create an anchor element - for later
-    link.href = '#';                        // Empty link, for now
-    link.append(element.thread_title);
-    li.append(link);
+    let li = document.createElement('li');   // Create list element to hold title of post
+    let author = document.createElement('p');    // Create author paragraph
+    let title = document.createElement('a'); // Create an anchor element - for later
+    title.href = '#';                        // Empty link, for now
+    title.append(element.thread_title);
+    author.append(element.user);
+    li.append(`${element.icon} | `);
+    li.append(title);
+    li.append(author);
     thread_list.append(li);                 // Add the new post title to the thread_list
   }
+
 }
 // Add listener for link clicks
-// Bubble, check which link it came from, get title, get data, populate forum
+document.getElementById("thread-list").addEventListener('click', (event) => {
+  event.preventDefault();
+  event.stopPropagation();
+  console.log("thread clicked!");
+  console.log(`element was ${event.target.textContent}`);
+
+  let title = event.target.textContent;
+
+  console.log("fetching post content");
+
+  fetch('http://localhost:7777/api/threads')
+    .then(response => {
+      if (!response.ok) {
+        // Catches any http 4xx or 5xx errors
+        throw new Error("Error fetching threads. Check the address or connection.");
+      }
+      else {
+        return response.json();
+      }
+    })
+    .then(jsonData => {
+      for(let element of jsonData) {
+        if (element.thread_title === title) {
+          console.log("Found a match");
+          // TODO: Setup the post content
+          // TODO: match id instead of title?
+        }
+      }
+    })
+    .catch(error => console.log(error));
+
+
+})
