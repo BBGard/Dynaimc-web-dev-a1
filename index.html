@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Front-end Forum</title>
+
+  <link href="./styles/styles.css" rel="stylesheet">
+  <script defer src="scripts/scripts.js"></script>
+</head>
+
+<body>
+  <div class="container">
+    <header id="header" class="hidden">
+      <!-- Nabar (initially hidden) -->
+      <nav id="navbar">
+        <div class="logo">
+          <a href="#">The <span>Front-end</span> Forum</a>
+        </div>
+        <!-- Menu NOTE: just empty links for styling -->
+        <div class="menu">
+          <ul>
+            <li><a href="#" id="current">Home</a></li>
+            <li><a href="#">About</a></li>
+            <li><a href="#">Contact</a></li>
+            <!-- welcome-box, used to display logged in username -->
+            <li><a href="#" id="welcome-box" class="">Welcome back, </a></li>
+          </ul>
+        </div>
+        <div class="burger">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </nav>
+      <!-- END Navbar -->
+    </header>
+
+    <main>
+      <!-- Login Block -->
+      <div id="login-block" class="">
+        <div id="title-block">
+          <h1 id="title">The <span>Front-end</span> Forum</h1>
+          <p id="description">Welcome to the dev team!</p>
+        </div>
+        <!-- Login Form -->
+        <div id="login-box">
+          <form id="login-form">
+            <h2>Login</h2>
+            <div class="form-group">
+              <!-- Input field only allows letters and numbers -->
+              <input type="text" name="username-field" id="username-field"
+              required placeholder="Username" class="form-control"
+              pattern="[A-Za-z0-9]+" title="Username should only contain letters and/or numbers.">
+              <div id="error-message" class="hidden"></div>
+            </div>
+            <div class="form-group">
+              <input type="submit" id="submit" class="submit-button" value="Login" />
+            </div>
+          </form>
+        </div>
+        <!-- END Login Form -->
+      </div>
+      <!-- END Login Block -->
+
+      <!-- Forum Block -->
+      <div id="forum-block" class="hidden">
+        <div id="forum-title">
+          <h3>Latest Threads</h3>
+          <div class="button-container">
+            <button id="new-thread-butt">New Thread</button>
+          </div>
+        </div>
+        <section id="latest-posts">
+          <ul id="thread-list">
+          </ul>
+        </section>
+      </div>
+      <!-- END Forum Block -->
+    </main>
+  </div>
+</body>
+
+</html>

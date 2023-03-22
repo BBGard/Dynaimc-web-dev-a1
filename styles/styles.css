@@ -1,0 +1,481 @@
+/***
+    The new CSS reset - version 1.8.4 (last updated 14.2.2023)
+    GitHub page: https://github.com/elad2412/the-new-css-reset
+***/
+
+/*
+    Remove all the styles of the "User-Agent-Stylesheet", except for the 'display' property
+    - The "symbol *" part is to solve Firefox SVG sprite bug
+ */
+*:where(:not(html, iframe, canvas, img, svg, video, audio):not(svg *, symbol *)) {
+  all: unset;
+  display: revert;
+}
+
+/* Preferred box-sizing value */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Reapply the pointer cursor for anchor tags */
+a, button {
+  cursor: revert;
+}
+
+/* Remove list styles (bullets/numbers) */
+ol, ul, menu {
+  list-style: none;
+}
+
+/* For images to not be able to exceed their container */
+img {
+  max-inline-size: 100%;
+  max-block-size: 100%;
+}
+
+/* removes spacing between cells in tables */
+table {
+  border-collapse: collapse;
+}
+
+/* Safari - solving issue when using user-select:none on the <body> text input doesn't working */
+input, textarea {
+  -webkit-user-select: auto;
+}
+
+/* revert the 'white-space' property for textarea elements on Safari */
+textarea {
+  white-space: revert;
+}
+
+/* minimum style to allow to style meter element */
+meter {
+  -webkit-appearance: revert;
+  appearance: revert;
+}
+
+/* preformatted text - use only for this feature */
+:where(pre) {
+  all: revert;
+}
+
+/* reset default text opacity of input placeholder */
+::placeholder {
+  color: unset;
+}
+
+/* remove default dot (•) sign */
+::marker {
+  content: initial;
+}
+
+/* fix the feature of 'hidden' attribute.
+ display:revert; revert to element instead of attribute */
+:where([hidden]) {
+  display: none;
+}
+
+/* revert for bug in Chromium browsers
+ - fix for the content editable attribute will work properly.
+ - webkit-user-select: auto; added for Safari in case of using user-select:none on wrapper element*/
+:where([contenteditable]:not([contenteditable="false"])) {
+  -moz-user-modify: read-write;
+  -webkit-user-modify: read-write;
+  overflow-wrap: break-word;
+  -webkit-line-break: after-white-space;
+  -webkit-user-select: auto;
+}
+
+/* apply back the draggable feature - exist only in Chromium and Safari */
+:where([draggable="true"]) {
+  -webkit-user-drag: element;
+}
+
+/* Revert Modal native behavior */
+:where(dialog:modal) {
+  all: revert;
+}
+
+/* -------------------------------- END RESET ------------------------------- */
+/* --------------------------------------------------------------------------- */
+
+
+/***
+    The following code is by Benjamin Gardiner, unless otherwise stated.
+***/
+
+/* --------------------------- General Styling -----------------------------*/
+:root {
+  /* Declare variables for later */
+  /* --clr-bg:#1F271B;
+  --clr-font: #F3FCF0;
+  --clr1: #FFD23F;
+  --clr2: #EE4266;
+  --clr3: #540D6E; */
+  --color-white: #f3f3f3;
+  --color-offwhite: #e6e6e6;
+  --color-black: #141414;
+  --color-blue: #608af0;
+  --color-darkblue: #213547;
+  --color-darkblue-alpha: rgba(27, 27, 50, 0.8);
+  --color-green: #42d392;
+  --color-darkgreen: #33a06f;
+  --color-red: #ff0048;
+  --font-body: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --font-heading: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+}
+
+body {
+  margin: 0 auto;
+  background-color: var(--clr-bg);
+  color: var(--color-black);
+  font-family: var(--font-body);
+}
+
+h1, p {
+  text-align: center;
+  margin: 0 0 0.5rem 0;
+}
+
+h2 {
+  font-size: clamp(1rem, 5vw, 3rem);
+}
+
+h3 {
+  font-size: clamp(2rem, 5vw, 2.5rem);
+  font-weight: 500;
+}
+
+/* Special classes to hide elements */
+.hidden {
+  display: none;
+}
+
+.container {
+  width: 100%;
+  margin: 0 auto;
+  /* Fill viewheight and fit header */
+  height: calc(100vh - 10rem);
+  height: calc(100dvh - 10rem);
+}
+
+header {
+  background: -webkit-linear-gradient(180deg, var(--color-green), var(--color-darkblue));
+  color: var(--color-white);
+  height: 5rem;
+}
+
+main {
+  margin: 3% auto ;
+}
+
+/* ------------------------------ Navbar Styling-------------------------------- */
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 auto;
+  padding: 1rem 5rem;
+  text-align: center;
+  font-size: 1.8rem;
+  float: right;
+}
+
+.logo {
+  position: absolute;
+  left: 0;
+  padding-top: 1rem;
+  padding-left: 3%;
+}
+
+.logo a {
+  font-family: var(--font-heading);
+  text-decoration: none;
+  font-size: 1.8rem;
+}
+
+.menu ul {
+  display: flex;
+  margin: 0;
+  padding: 0;
+}
+
+.menu li {
+  margin-left: 2rem;
+}
+
+.menu a {
+  font-family: var(--font-body);
+  font-size: 1.2rem;
+}
+
+#welcome-box {
+  font-size: 0.8rem;
+  background: -webkit-linear-gradient(var(--color-darkgreen), var(--color-blue));
+  padding: 0.5rem;
+  border-radius: 8px;
+}
+
+#current {
+  color: var(--color-darkblue);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.burger {
+  display: none;
+}
+
+/* --------------------------- END Navbar Styling -----------------------------*/
+
+
+/* --------------------------- END General Styling -----------------------------*/
+/* --------------------------------------------------------------------------- */
+
+
+
+
+/* --------------------------- Login Screen Styling -----------------------------*/
+
+#title-block {
+  text-align: center;
+  padding: 3rem 0;
+  width: 100%;
+}
+
+
+#title {
+  font-size: clamp(4rem, 10vw, 6rem);
+  font-family: var(--font-heading);
+  color: var(--color-darkblue);
+}
+
+#title span, .logo a span {
+  background: -webkit-linear-gradient(var(--color-green), var(--color-blue));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+#description {
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(1.125rem, 5vw, 1.5rem);
+  color: var(--color-darkblue);
+}
+
+#login-box {
+  margin: 0 auto;
+  min-width: 420px;
+  width: 75%;
+  max-width: 576px;
+}
+
+#login-box h2 {
+  text-align: center;
+  margin-bottom: 1rem;
+  color: var(--color-white);
+}
+
+form {
+  padding: 2.5rem;
+  background: var(--color-darkblue);
+  border-radius: 0.25rem;
+}
+
+.form-group {
+  margin: 0 auto 1.25rem auto;
+  padding: 0.25rem;
+}
+
+
+#error-message {
+  display: flex;
+  align-items: center;
+  width: 25rem;
+  font-size: 1.125rem;
+  margin-bottom: 0.5rem;
+  cursor: default;
+  color: var(--color-red);
+  padding: 0.25rem;
+}
+
+.form-control {
+  display: block;
+  width: 100%;
+  height: 3rem;
+  padding: 0.375rem 0.75rem;
+  color: var(--color-darkblue);
+  font-size: 1rem;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 2px solid var(--color-white);
+  border-radius: 5px;
+  box-shadow: 2px 2px 5px var(--color-black);
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control:hover {
+  border: solid var(--color-white) 2px;
+  box-shadow: 0 0 5px var(--color-green);
+  font-weight: 500;
+}
+
+.form-control:focus {
+  border: solid var(--color-green) 2px;
+  box-shadow: 0 0 5px var(--color-green);
+}
+
+input, button, select, textarea {
+  margin: 0;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.submit-button {
+  display: block;
+  margin: 0 auto;
+  width: 100%;
+  font-size: 1.2rem;
+  font-weight: 600;
+  text-align: center;
+  padding: 0.75rem;
+  background: var(--color-green);
+  color: var(--color-white);
+  border: solid var(--color-white) 2px ;
+  box-shadow: 2px 2px 5px var(--color-black);
+  border-radius: 5px;
+  cursor: pointer;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+
+}
+
+.submit-button:hover {
+  border: solid var(--color-white) 3px;
+  box-shadow: 0 0 5px var(--color-green);
+  font-weight: 800;
+  background-color: var(--color-darkgreen);
+}
+
+/* ---------------------------  END Login Styling -----------------------------*/
+/* --------------------------------------------------------------------------- */
+
+
+/* --------------------------- Forum Styling -----------------------------*/
+
+/* .forum-container {
+  margin: 0 auto;
+  background-color: rgb(228, 228, 228);
+} */
+
+
+
+
+#forum-block {
+  margin: 3% auto;
+  padding: 1rem;
+  min-width: 420px;
+  width: 75%;
+  max-width: 900px;
+  background-color: var(--color-white);
+  border-radius: 22.4px;
+}
+
+#forum-title {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  text-align: center;
+}
+
+#new-thread-butt {
+  display: block;
+  margin: 0 auto;
+  min-width: fit-content;
+  max-width: 250px;
+  font-size: 1rem;
+  font-weight: 500;
+  text-align: center;
+  padding: 0.75rem;
+  background: var(--color-green);
+  color: var(--color-white);
+  /* border: solid var(--color-darkgreen) 2px ; */
+  box-shadow: 2px 2px 5px var(--color-darkblue-alpha);
+  border-radius: 15px;
+  cursor: pointer;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+
+}
+
+#new-thread-butt:hover {
+  box-shadow: 0 0 5px var(--color-green);
+  background-color: var(--color-darkgreen);
+}
+
+#latest-posts {
+  height: 75%;
+  margin: 5% auto;
+  /* padding: 2rem 0; */
+  /* border: solid 2px var(--color-darkblue); */
+  /* border-radius: 22.4px; */
+}
+
+#latest-posts ul li {
+  padding: 0.75rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 500;
+  border: solid 1px var(--color-blue);
+  border-bottom: none;
+  background-color: var(--color-offwhite);
+
+}
+
+/* Add border to bottom of last post */
+#latest-posts ul > :last-child {
+  border-bottom: solid 1px var(--color-blue);
+  border-radius: 0 0 10px 10px;
+}
+
+/* Curve top border */
+#latest-posts ul > :first-child {
+  border-radius: 10px 10px 0 0 ;
+}
+
+#latest-posts ul li a:hover {
+  color: var(--color-darkgreen);
+}
+
+/* MEDIA QUERIES */
+/* @media (min-width: 576px) {
+  .container {
+    max-width: 540px;
+
+  }
+ }
+
+  @media (min-width: 768px) {
+  .container {
+    max-width: 720px;
+  }
+} */
+
+/* Forum */
+@media (max-width: 768px) {
+  .menu {
+    display: none;
+  }
+  .burger {
+    display: block;
+    cursor: pointer;
+  }
+  .burger span {
+    display: block;
+    width: 30px;
+    height: 4px;
+    margin-bottom: 5px;
+    background-color: var(--color-white);
+  }
+}
