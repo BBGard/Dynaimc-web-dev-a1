@@ -69,6 +69,7 @@ document.getElementById('username-field').addEventListener('focus', (event) => {
 
 // Get thread list element from page
 const thread_list = document.getElementById("thread-list");
+let threadTitles = [];  // An array for storing thread title links
 
 // Store threads in a local object
 let thread_object;
@@ -111,51 +112,124 @@ function populateThreadList(data) {
   console.log("Populating thread_list");
 
   // TODO: Set id on post equal to id in API
-  for (let element of data) {
+  // for (let element of data) {
+  //   let li = document.createElement('li');   // Create list element to hold title of post
+  //   let author = document.createElement('p');    // Create author paragraph
+  //   let title = document.createElement('a'); // Create an anchor element - for later
+  //   title.href = '#';                        // Empty link, for now
+  //   title.append(element.thread_title);
+  //   author.append(element.user);
+  //   li.append(`${element.icon} | `);
+  //   li.append(title);
+  //   li.append(author);
+  //   thread_list.append(li);                 // Add the new post title to the thread_list
+  // }
+
+  for (let i = 0; i < data.length; i++) {
     let li = document.createElement('li');   // Create list element to hold title of post
     let author = document.createElement('p');    // Create author paragraph
     let title = document.createElement('a'); // Create an anchor element - for later
     title.href = '#';                        // Empty link, for now
-    title.append(element.thread_title);
-    author.append(element.user);
-    li.append(`${element.icon} | `);
+    title.append(data[i].thread_title);
+    author.append(data[i].user);
+    li.append(`${data[i].icon} | `);
     li.append(title);
     li.append(author);
     thread_list.append(li);                 // Add the new post title to the thread_list
   }
 
+  // Once populated, setup some click event listeners
+  setupListeners();
+
 }
-// Add listener for link clicks
-document.getElementById("thread-list").addEventListener('click', (event) => {
-  event.preventDefault();
-  event.stopPropagation();
-  console.log("thread clicked!");
-  console.log(`element was ${event.target.textContent}`);
+// Add listeners for link clicks
+function setupListeners() {
+  threadTitles = Array.from(thread_list.getElementsByTagName("li"));
 
-  let title = event.target.textContent;
+  // Add listener for each thread title
+  threadTitles.forEach((title, index) => {
+    title.addEventListener("click", (event) => {
+      event.preventDefault();
+      console.log(`You clicked item: ${index}`);
 
-  console.log("fetching post content");
+      // Load and display posts.
+      fetchPostData(index);
+    });
+  });
+}
 
-  fetch('http://localhost:7777/api/threads')
+function fetchPostData(index) {
+  console.log("Fetching posts");
+  fetch(`http://localhost:7777/api/threads/${index + 1}/posts`)
     .then(response => {
       if (!response.ok) {
         // Catches any http 4xx or 5xx errors
-        throw new Error("Error fetching threads. Check the address or connection.");
+        throw new Error("Error fetching posts. Check the address or connection.");
       }
       else {
         return response.json();
       }
     })
-    .then(jsonData => {
-      for(let element of jsonData) {
-        if (element.thread_title === title) {
-          console.log("Found a match");
-          // TODO: Setup the post content
-          // TODO: match id instead of title?
-        }
-      }
-    })
+    .then(jsonData => populatePostList(jsonData, index))
     .catch(error => console.log(error));
+}
 
 
-})
+const populatePostList = (data, index) => {
+
+  if(threadTitles === undefined) return;
+
+  //TODO Prevent adding already shown content
+  // maybe wipe and start fresh?
+  // let children = threadTitles[index].querySelectorAll('p');
+  // for(let i=0; i<children.length; i++) {
+  //   threadTitles[index].remove(i+1);
+  // }
+
+  //TODO Close the thread on click
+  for(let i=0; i<data.length; i++) {
+    let postText = document.createElement('p');
+    let postAuthor = document.createElement('p');
+
+    postAuthor = data[i].name;
+    postText = data[i].text;
+
+    threadTitles[index].append(postText);
+    threadTitles[index].append(postAuthor);
+  }
+
+}
+
+// document.getElementById("thread-list").addEventListener('click', (event) => {
+//   event.preventDefault();
+//   event.stopPropagation();
+//   console.log("thread clicked!");
+//   console.log(`element was ${event.target.textContent}`);
+
+//   let title = event.target.textContent;
+
+//   console.log("fetching post content");
+
+//   fetch('http://localhost:7777/api/threads')
+//     .then(response => {
+//       if (!response.ok) {
+//         // Catches any http 4xx or 5xx errors
+//         throw new Error("Error fetching threads. Check the address or connection.");
+//       }
+//       else {
+//         return response.json();
+//       }
+//     })
+//     .then(jsonData => {
+//       for(let element of jsonData) {
+//         if (element.thread_title === title) {
+//           console.log("Found a match");
+//           // TODO: Setup the post content
+//           // TODO: match id instead of title?
+//         }
+//       }
+//     })
+//     .catch(error => console.log(error));
+
+
+// })
