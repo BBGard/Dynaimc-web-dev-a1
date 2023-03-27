@@ -1,3 +1,4 @@
+import { Thread } from "./Thread.js";
 /**
 * This script verifies a username before allowing user into (building) forum
  */
@@ -126,18 +127,24 @@ function populateThreadList(data) {
   //   thread_list.append(li);                 // Add the new post title to the thread_list
   // }
 
-  for (let i = 0; i < data.length; i++) {
-    let li = document.createElement('li');   // Create list element to hold title of post
-    let author = document.createElement('p');    // Create author paragraph
-    let title = document.createElement('a'); // Create an anchor element - for later
-    title.href = '#';                        // Empty link, for now
-    title.append(data[i].thread_title);
-    author.append(data[i].user);
-    li.append(`${data[i].icon} | `);
-    li.append(title);
-    li.append(author);
-    thread_list.append(li);                 // Add the new post title to the thread_list
-  }
+  data.forEach(thread => {
+    let myThread = new Thread(thread.thread_title, thread.icon, thread.user);
+    console.log(myThread.thread_title);
+    thread_list.innerHTML += myThread.toHTML();
+  })
+
+  // for (let i = 0; i < data.length; i++) {
+  //   let li = document.createElement('li');   // Create list element to hold title of post
+  //   let author = document.createElement('p');    // Create author paragraph
+  //   let title = document.createElement('a'); // Create an anchor element - for later
+  //   title.href = '#';                        // Empty link, for now
+  //   title.append(data[i].thread_title);
+  //   author.append(data[i].user);
+  //   li.append(`${data[i].icon} | `);
+  //   li.append(title);
+  //   li.append(author);
+  //   thread_list.append(li);                 // Add the new post title to the thread_list
+  // }
 
   // Once populated, setup some click event listeners
   setupListeners();
