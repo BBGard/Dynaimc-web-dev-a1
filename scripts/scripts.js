@@ -110,6 +110,7 @@ function fetchPosts() {
 // Populate the thread list with the fetched posts
 function populateThreadList(data) {
   console.log("Populating thread_list");
+  console.log(data);
 
   // TODO: Set id on post equal to id in API
   // for (let element of data) {
