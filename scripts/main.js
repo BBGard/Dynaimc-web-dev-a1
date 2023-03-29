@@ -1,4 +1,5 @@
 import { Thread } from "./Thread.js";
+import { Post } from "./Post.js";
 /**
 * This script verifies a username before allowing user into (building) forum
  */
@@ -50,7 +51,7 @@ function setupForum() {
   document.getElementById("forum-block").classList.remove('hidden');  // Display empty forum block
   document.getElementById("welcome-box").textContent += `${current_user}!`;   // Show logged in username
 
-  fetchPosts(); // Try to fetch forum posts
+  fetchThreads(); // Try to fetch forum posts
   //window.setInterval(fetchPosts, 10000);
 }
 
@@ -78,7 +79,7 @@ let thread_object;
 
 /* --------------------------- Forum Functions ------------------------------- */
 // Try to fetch posts
-function fetchPosts() {
+function fetchThreads() {
   //   console.log("Fetching threads");
   //   fetch('http://localhost:7777/api/threads')
   //     .then(response => {
@@ -111,40 +112,38 @@ function fetchPosts() {
 // Populate the thread list with the fetched posts
 function populateThreadList(data) {
   console.log("Populating thread_list");
-  console.log(data);
-
-  // TODO: Set id on post equal to id in API
-  // for (let element of data) {
-  //   let li = document.createElement('li');   // Create list element to hold title of post
-  //   let author = document.createElement('p');    // Create author paragraph
-  //   let title = document.createElement('a'); // Create an anchor element - for later
-  //   title.href = '#';                        // Empty link, for now
-  //   title.append(element.thread_title);
-  //   author.append(element.user);
-  //   li.append(`${element.icon} | `);
-  //   li.append(title);
-  //   li.append(author);
-  //   thread_list.append(li);                 // Add the new post title to the thread_list
-  // }
+  // console.log(data);
 
   data.forEach(thread => {
+    // Create a new thread
     let myThread = new Thread(thread.thread_title, thread.icon, thread.user);
-    console.log(myThread.thread_title);
-    thread_list.innerHTML += myThread.toHTML();
-  })
+    // console.log(thread);
+    // Fetch the posts for that thread
+    console.log(`Fetching posts for thread ${thread.id}`);
+    fetch(`http://localhost:7777/api/threads/${thread.id}`)
+      .then(response => {
+        if (!response.ok) {
+          // Catches any http 4xx or 5xx errors
+          throw new Error("Error fetching posts. Check the address or connection.");
+        }
+        else {
+          return response.json();
+        }
+      })
+      .then(data => {
+        data.posts.forEach(post => {
+          console.log("Post!");
+          console.log(post);
+        })
+        // console.log("post");
+        // console.log(data.posts);
+        /////////////////////////////////////////////////////////////////////////////// Im here!
+      })
+      .catch(error => console.log(error));
 
-  // for (let i = 0; i < data.length; i++) {
-  //   let li = document.createElement('li');   // Create list element to hold title of post
-  //   let author = document.createElement('p');    // Create author paragraph
-  //   let title = document.createElement('a'); // Create an anchor element - for later
-  //   title.href = '#';                        // Empty link, for now
-  //   title.append(data[i].thread_title);
-  //   author.append(data[i].user);
-  //   li.append(`${data[i].icon} | `);
-  //   li.append(title);
-  //   li.append(author);
-  //   thread_list.append(li);                 // Add the new post title to the thread_list
-  // }
+    // console.log(myThread.thread_title);
+    thread_list.append(myThread.toDOM());
+  });
 
   // Once populated, setup some click event listeners
   setupListeners();
@@ -153,7 +152,7 @@ function populateThreadList(data) {
 // Add listeners for link clicks
 function setupListeners() {
   threadTitles = Array.from(thread_list.getElementsByTagName("li"));
-
+  console.log("adding listeners");
   // Add listener for each thread title
   threadTitles.forEach((title, index) => {
     title.addEventListener("click", (event) => {
@@ -161,12 +160,12 @@ function setupListeners() {
       console.log(`You clicked item: ${index}`);
 
       // Load and display posts.
-      fetchPostData(index);
+      fetchPostData(index, event.currentTarget);
     });
   });
 }
 
-function fetchPostData(index) {
+function fetchPostData(index, element) {
   console.log("Fetching posts");
   fetch(`http://localhost:7777/api/threads/${index + 1}/posts`)
     .then(response => {
@@ -178,32 +177,41 @@ function fetchPostData(index) {
         return response.json();
       }
     })
-    .then(jsonData => populatePostList(jsonData, index))
+    .then(jsonData => showPost(jsonData, element))
     .catch(error => console.log(error));
 }
 
 
-const populatePostList = (data, index) => {
+const showPost = (data, element) => {
+  console.log("Element");
 
   if(threadTitles === undefined) return;
+  console.log(element);
 
   //TODO Prevent adding already shown content
   // maybe wipe and start fresh?
-  // let children = threadTitles[index].querySelectorAll('p');
-  // for(let i=0; i<children.length; i++) {
-  //   threadTitles[index].remove(i+1);
-  // }
 
   //TODO Close the thread on click
-  for(let i=0; i<data.length; i++) {
-    let postText = document.createElement('p');
-    let postAuthor = document.createElement('p');
 
-    postAuthor = data[i].name;
-    postText = data[i].text;
+  // data.forEach(post => {
+  //   let myPost = new Post(post.text, post.user, post.name);
+  //   element.append(myPost.toDOM());
 
-    threadTitles[index].append(postText);
-    threadTitles[index].append(postAuthor);
+  // })
+
+  for (let i=0; i<data.length; i++ ) {
+    console.log("data");
+    console.log(data);
+    console.log(`data[i]: ${data[i]}`);
+    console.log(`data[i].text: ${data[i].text}`);
+
+    if(data[i].text === Thread.threadList[i].text) {
+      console.log("Found the same thread!");
+    }
+    else {
+      let myPost = new Post(data[i].text, data[i].user, data[i].name);
+      element.append(myPost.toDOM());
+    }
   }
 
 }
