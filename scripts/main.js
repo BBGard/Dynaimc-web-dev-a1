@@ -50,7 +50,7 @@ const setupForum = () => {
 
   fetchThreads(); // Try to fetch forum posts
   //window.setInterval(fetchPosts, 10000);
-}
+};
 
 // Clear any error messages on input field focus
 document.getElementById('username-field').addEventListener('focus', (event) => {
@@ -87,7 +87,7 @@ const fetchThreads = () => {
     })
     .then(jsonData => populateThreadList(jsonData))
     .catch(error => console.log(error));
-}
+};
 
 // Populate the thread list with the fetched posts
 const populateThreadList = (data) => {
@@ -104,47 +104,47 @@ const populateThreadList = (data) => {
     let threadElements = threadList.getElementsByTagName('ul');
 
     // Fetch the posts for that thread
-    fetchPostsForThread(myThread, threadElements);
+    //fetchPostsForThread(myThread, threadElements);
   });
 
   // Once populated, setup some click event listeners on each thread title
   setupListeners();
 
-}
+};
 
 // Try to fetch the posts for a particular thread
-const fetchPostsForThread = (myThread, threadElements) => {
-  console.log(`Fetching posts for thread ${myThread.id}`);
-    fetch(`http://localhost:7777/api/threads/${myThread.id}/posts`)
-      .then(response => {
-        if (!response.ok) {
-          // Catches any http 4xx or 5xx errors
-          throw new Error("Error fetching posts. Check the address or connection.");
-        }
-        else {
-          return response.json();
-        }
-      })
-      .then(data => {
-        // Create post, attach to correct thread, hide
-        data.forEach(post => {
-          // Create a new post
-          let myPost = new Post(post.text, post.user, post.name);
-          let myPostElement = myPost.toDOM();
-          myPostElement.classList.add('post'); // Add some styling
-          // myPostElement.classList.add('hidden'); // Hide the posts for now
+// const fetchPostsForThread = (myThread, threadElements) => {
+//   console.log(`Fetching posts for thread ${myThread.id}`);
+//     fetch(`http://localhost:7777/api/threads/${myThread.id}/posts`)
+//       .then(response => {
+//         if (!response.ok) {
+//           // Catches any http 4xx or 5xx errors
+//           throw new Error("Error fetching posts. Check the address or connection.");
+//         }
+//         else {
+//           return response.json();
+//         }
+//       })
+//       .then(data => {
+//         // Create post, attach to correct thread, hide
+//         data.forEach(post => {
+//           // Create a new post
+//           let myPost = new Post(post.text, post.user, post.name);
+//           let myPostElement = myPost.toDOM();
+//           myPostElement.classList.add('post'); // Add some styling
+//           // myPostElement.classList.add('hidden'); // Hide the posts for now
 
-          // Append the post to the correct thread element
-          threadElements[myThread.id-1].append(myPostElement);
-          threadElements[myThread.id-1].classList.add('hidden'); // Hide the posts for now
+//           // Append the post to the correct thread element
+//           threadElements[myThread.id-1].append(myPostElement);
+//           threadElements[myThread.id-1].classList.add('hidden'); // Hide the posts for now
 
 
-          // Add the post to the threads postList
-          myThread.postList.push(myPost);
-        })
-      })
-      .catch(error => console.log(error));
-}
+//           // Add the post to the threads postList
+//           myThread.postList.push(myPost);
+//         })
+//       })
+//       .catch(error => console.log(error));
+// }
 
 // Add listeners for thread title clicks
 const setupListeners = () => {
@@ -160,84 +160,93 @@ const setupListeners = () => {
       // console.log(`You clicked item: ${index}`);
 
       // Hide or show the posts
-      let threadElements = threadList.getElementsByTagName('ul')[index];
+       let threadElement = threadList.getElementsByTagName('ul')[index];
 
-      if(threadElements.classList.contains('hidden')) {
-        threadElements.classList.remove('hidden');
+      if(threadElement.classList.contains('hidden')) {
+        threadElement.classList.remove('hidden');
       }
       else {
-        threadElements.classList.add('hidden');
+        threadElement.classList.add('hidden');
       }
+
+      //TODO Dynamically load posts
+      fetchPostsForThread_v2(index+1, threadElement);
 
     });
   });
-}
+};
+
+const fetchPostsForThread_v2 = (id, threadElement) => {
+  // console.log(`Fetching posts for thread ${myThread.id}`);
+  // Get the thread being referenced
+  let myThread = Thread.threadList[id-1];
+
+  console.log(`Fetching posts for thread: ${id}`);
+  fetch(`http://localhost:7777/api/threads/${id}/posts`)
+    .then(response => {
+      if (!response.ok) {
+        // Catches any http 4xx or 5xx errors
+        throw new Error("Error fetching posts. Check the address or connection.");
+      }
+      else {
+        return response.json();
+      }
+    })
+    .then(data => {
+      // Create post, attach to correct thread, hide
+      data.forEach(post => {
+        // Create a new post
+        let myPost = new Post(post.text, post.user, post.name);
+        let myPostElement = myPost.toDOM();
+        myPostElement.classList.add('post'); // Add some styling
+
+        // Check if the post already exists
+        if(myThread.postList.some(p => p.text === myPost.text)) {
+          // If post exists, return
+          return;
+        }
+        else {
+          // Add the post to the thread
+          threadElement.append(myPostElement);
+          myThread.postList.push(myPost);
+        }
+      })
+    })
+    .catch(error => console.log(error));
+
+};
 
 
-const showPost = (data, element) => {
-  console.log("Element");
+// const showPost = (data, element) => {
+//   console.log("Element");
 
-  // if(threadTitles === undefined) return;
-  console.log(element);
+//   // if(threadTitles === undefined) return;
+//   console.log(element);
 
-  //TODO Prevent adding already shown content
-  // maybe wipe and start fresh?
+//   //TODO Prevent adding already shown content
+//   // maybe wipe and start fresh?
 
-  //TODO Close the thread on click
+//   //TODO Close the thread on click
 
-  // data.forEach(post => {
-  //   let myPost = new Post(post.text, post.user, post.name);
-  //   element.append(myPost.toDOM());
+//   // data.forEach(post => {
+//   //   let myPost = new Post(post.text, post.user, post.name);
+//   //   element.append(myPost.toDOM());
 
-  // })
+//   // })
 
-  for (let i=0; i<data.length; i++ ) {
-    console.log("data");
-    console.log(data);
-    console.log(`data[i]: ${data[i]}`);
-    console.log(`data[i].text: ${data[i].text}`);
+//   for (let i=0; i<data.length; i++ ) {
+//     console.log("data");
+//     console.log(data);
+//     console.log(`data[i]: ${data[i]}`);
+//     console.log(`data[i].text: ${data[i].text}`);
 
-    if(data[i].text === Thread.threadList[i].text) {
-      console.log("Found the same thread!");
-    }
-    else {
-      let myPost = new Post(data[i].text, data[i].user, data[i].name);
-      element.append(myPost.toDOM());
-    }
-  }
+//     if(data[i].text === Thread.threadList[i].text) {
+//       console.log("Found the same thread!");
+//     }
+//     else {
+//       let myPost = new Post(data[i].text, data[i].user, data[i].name);
+//       element.append(myPost.toDOM());
+//     }
+//   }
 
-}
-
-// document.getElementById("thread-list").addEventListener('click', (event) => {
-//   event.preventDefault();
-//   event.stopPropagation();
-//   console.log("thread clicked!");
-//   console.log(`element was ${event.target.textContent}`);
-
-//   let title = event.target.textContent;
-
-//   console.log("fetching post content");
-
-//   fetch('http://localhost:7777/api/threads')
-//     .then(response => {
-//       if (!response.ok) {
-//         // Catches any http 4xx or 5xx errors
-//         throw new Error("Error fetching threads. Check the address or connection.");
-//       }
-//       else {
-//         return response.json();
-//       }
-//     })
-//     .then(jsonData => {
-//       for(let element of jsonData) {
-//         if (element.thread_title === title) {
-//           console.log("Found a match");
-//           // TODO: Setup the post content
-//           // TODO: match id instead of title?
-//         }
-//       }
-//     })
-//     .catch(error => console.log(error));
-
-
-// })
+// }
