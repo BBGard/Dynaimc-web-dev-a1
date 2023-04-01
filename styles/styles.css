@@ -146,8 +146,8 @@ h2 {
 }
 
 h3 {
-  font-size: clamp(1.2rem, 5vw, 1.6rem);
-  font-weight: 500;
+  font-size: clamp(1.4rem, 5vw, 2rem);
+  font-weight: 700;
 }
 
 /* Special classes to hide elements */
@@ -437,7 +437,7 @@ input, button, select, textarea {
 /* Thread title */
 /* #latest-posts ul li a { */
 .thread a {
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   font-weight: 500;
 }
 

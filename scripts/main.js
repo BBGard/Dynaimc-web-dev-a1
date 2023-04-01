@@ -62,6 +62,7 @@ const setupForum = () => {
   //window.setInterval(fetchPosts, 10000);
 
   document.getElementById('new-thread-butt').addEventListener('click', (event) => {
+    event.preventDefault();
     console.log("New thread!");
       //TODO create new thread here
 
@@ -204,6 +205,7 @@ const fetchPostsForThread = (id, threadElement) => {
         threadElement.append(replyForm);
 
         replyForm.getElementsByClassName('reply-button')[0].addEventListener('click', (event) => {
+          event.preventDefault();
           console.log("Post reply!");
             //TODO create new post here
             console.log(event.target);
