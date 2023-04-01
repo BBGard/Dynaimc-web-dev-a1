@@ -3,6 +3,7 @@ export class Post {
     this.text = text;
     this.user = user;
     this.name = name;
+    // this.id = id;
   }
 
   toDOM() {
