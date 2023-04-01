@@ -99,52 +99,12 @@ const populateThreadList = (data) => {
 
     // Append thread to thread list
     threadList.append(myThread.toDOM());
-
-    // Get thread elements (to append posts to)
-    let threadElements = threadList.getElementsByTagName('ul');
-
-    // Fetch the posts for that thread
-    //fetchPostsForThread(myThread, threadElements);
   });
 
   // Once populated, setup some click event listeners on each thread title
   setupListeners();
 
 };
-
-// Try to fetch the posts for a particular thread
-// const fetchPostsForThread = (myThread, threadElements) => {
-//   console.log(`Fetching posts for thread ${myThread.id}`);
-//     fetch(`http://localhost:7777/api/threads/${myThread.id}/posts`)
-//       .then(response => {
-//         if (!response.ok) {
-//           // Catches any http 4xx or 5xx errors
-//           throw new Error("Error fetching posts. Check the address or connection.");
-//         }
-//         else {
-//           return response.json();
-//         }
-//       })
-//       .then(data => {
-//         // Create post, attach to correct thread, hide
-//         data.forEach(post => {
-//           // Create a new post
-//           let myPost = new Post(post.text, post.user, post.name);
-//           let myPostElement = myPost.toDOM();
-//           myPostElement.classList.add('post'); // Add some styling
-//           // myPostElement.classList.add('hidden'); // Hide the posts for now
-
-//           // Append the post to the correct thread element
-//           threadElements[myThread.id-1].append(myPostElement);
-//           threadElements[myThread.id-1].classList.add('hidden'); // Hide the posts for now
-
-
-//           // Add the post to the threads postList
-//           myThread.postList.push(myPost);
-//         })
-//       })
-//       .catch(error => console.log(error));
-// }
 
 // Add listeners for thread title clicks
 const setupListeners = () => {
@@ -157,7 +117,6 @@ const setupListeners = () => {
   threadTitles.forEach((title, index) => {
     title.addEventListener("click", (event) => {
       event.preventDefault();
-      // console.log(`You clicked item: ${index}`);
 
       // Hide or show the posts
        let threadElement = threadList.getElementsByTagName('ul')[index];
@@ -169,15 +128,15 @@ const setupListeners = () => {
         threadElement.classList.add('hidden');
       }
 
-      //TODO Dynamically load posts
-      fetchPostsForThread_v2(index+1, threadElement);
+      // Fetch the posts from the server
+      fetchPostsForThread(index+1, threadElement);
 
     });
   });
 };
 
-const fetchPostsForThread_v2 = (id, threadElement) => {
-  // console.log(`Fetching posts for thread ${myThread.id}`);
+// Attempt to fetch posts for thread "id" and append to "threadElement"
+const fetchPostsForThread = (id, threadElement) => {
   // Get the thread being referenced
   let myThread = Thread.threadList[id-1];
 
