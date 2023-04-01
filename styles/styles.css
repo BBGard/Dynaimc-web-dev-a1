@@ -114,8 +114,9 @@ meter {
   --clr1: #FFD23F;
   --clr2: #EE4266;
   --clr3: #540D6E; */
-  --color-white: #f3f3f3;
-  --color-offwhite: #e6e6e6;
+  /* --color-bg: #ffffff; */
+  --color-white: #ffffff;
+  --color-offwhite: #f3f3f3;
   --color-black: #141414;
   --color-blue: #608af0;
   --color-darkblue: #213547;
@@ -129,7 +130,7 @@ meter {
 
 body {
   margin: 0 auto;
-  background-color: var(--clr-bg);
+  background-color: var(--color-white);
   color: var(--color-black);
   font-family: var(--font-body);
 }
@@ -380,7 +381,7 @@ input, button, select, textarea {
   min-width: 420px;
   width: 75%;
   max-width: 900px;
-  background-color: var(--color-white);
+  background-color: var(--color-offwhite);
   border-radius: 22.4px;
 }
 
@@ -424,22 +425,25 @@ input, button, select, textarea {
   /* border-radius: 22.4px; */
 }
 
-#latest-posts ul li {
+/* #latest-posts ul li { */
+.thread, .post {
   padding: 0.75rem 2rem;
   border: solid 1px var(--color-blue);
   border-bottom: none;
-  background-color: var(--color-offwhite);
+  /* background-color: var(--color-offwhite); */
 }
 
-/* Post title */
-#latest-posts ul li a {
+/* Thread title */
+/* #latest-posts ul li a { */
+.thread a {
   font-size: 1.1rem;
   font-weight: 500;
 }
 
 /* Author name */
-#latest-posts ul li p {
+.author {
   font-size: 0.8rem;
+  font-weight: 500;
   color: var(--color-darkblue);
   text-align: right;
 }
@@ -455,8 +459,26 @@ input, button, select, textarea {
   border-radius: 10px 10px 0 0 ;
 }
 
-#latest-posts ul li a:hover {
+.thread a:hover {
   color: var(--color-darkgreen);
+}
+
+/* Post */
+.post {
+  background-color: var(--color-white);
+  border-color: var(--color-darkgreen);
+}
+
+/* Post text */
+.post p {
+  text-align: left;
+  font-weight: 500;
+}
+
+/* Post author */
+.post-name {
+  font-size: 0.8rem;
+  color: var(--color-darkblue);
 }
 
 /* MEDIA QUERIES */

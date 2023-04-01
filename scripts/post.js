@@ -14,7 +14,8 @@ export class Post {
     html.append(postContent);
 
     const postName = document.createElement('p');
-    postName.textContent = `${this.name}`;
+    postName.textContent = ` - ${this.name}`;
+    postName.classList.add('post-name')
     html.append(postName);
 
     return html;

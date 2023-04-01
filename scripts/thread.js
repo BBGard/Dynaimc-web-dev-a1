@@ -15,6 +15,7 @@ export class Thread {
 
   toDOM() {
     const html = document.createElement('li');
+    html.classList.add('thread'); // Styling
     html.append(this.icon);
 
     const title = document.createElement('a');
@@ -24,6 +25,7 @@ export class Thread {
 
     const user = document.createElement('p');
     user.textContent = `${this.user}`;
+    user.classList.add('author'); // Add some styling
     html.append(user);
 
     const posts = document.createElement('ul');

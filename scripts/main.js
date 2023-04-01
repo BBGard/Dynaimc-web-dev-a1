@@ -67,7 +67,7 @@ document.getElementById('username-field').addEventListener('focus', (event) => {
 /*  Declared here for neatness, keeping in mind hoisting will pull them up    */
 
 // Get thread list element from page
-const thread_list = document.getElementById("thread-list");
+const threadList = document.getElementById("thread-list");
 
 
 /* --------------------------- Forum Functions ------------------------------- */
@@ -98,10 +98,10 @@ const populateThreadList = (data) => {
     let myThread = new Thread(thread.thread_title, thread.icon, thread.user, thread.id);
 
     // Append thread to thread list
-    thread_list.append(myThread.toDOM());
+    threadList.append(myThread.toDOM());
 
     // Get thread elements (to append posts to)
-    let threadElements = thread_list.getElementsByTagName('ul');
+    let threadElements = threadList.getElementsByTagName('ul');
 
     // Fetch the posts for that thread
     fetchPostsForThread(myThread, threadElements);
@@ -131,10 +131,13 @@ const fetchPostsForThread = (myThread, threadElements) => {
           // Create a new post
           let myPost = new Post(post.text, post.user, post.name);
           let myPostElement = myPost.toDOM();
-          myPostElement.classList.add('hidden'); // Hide the posts for now
+          myPostElement.classList.add('post'); // Add some styling
+          // myPostElement.classList.add('hidden'); // Hide the posts for now
 
           // Append the post to the correct thread element
           threadElements[myThread.id-1].append(myPostElement);
+          threadElements[myThread.id-1].classList.add('hidden'); // Hide the posts for now
+
 
           // Add the post to the threads postList
           myThread.postList.push(myPost);
@@ -145,16 +148,27 @@ const fetchPostsForThread = (myThread, threadElements) => {
 
 // Add listeners for thread title clicks
 const setupListeners = () => {
-  // let threadTitles = Array.from(thread_list.getElementsByTagName("li"));
   // Create a list of thread titles
-  let threadTitles = Array.from(thread_list.getElementsByTagName("a"));
+  let threadTitles = Array.from(threadList.getElementsByTagName("a"));
   console.log("adding listeners");
+
   // Add a listener to each thread title
   //TODO maybe add one listener and use bubbling?
   threadTitles.forEach((title, index) => {
     title.addEventListener("click", (event) => {
       event.preventDefault();
-      console.log(`You clicked item: ${index}`);
+      // console.log(`You clicked item: ${index}`);
+
+      // Hide or show the posts
+      let threadElements = threadList.getElementsByTagName('ul')[index];
+
+      if(threadElements.classList.contains('hidden')) {
+        threadElements.classList.remove('hidden');
+      }
+      else {
+        threadElements.classList.add('hidden');
+      }
+
     });
   });
 }
