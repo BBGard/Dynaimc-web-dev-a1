@@ -5,8 +5,11 @@ import { Post } from "./Post.js";
 // For showing user error messages on the login form
 const error_message = document.getElementById('error-message');
 
-// The entered username from the login form
-let current_user = "";
+// An object to hold the current user
+let currentUser = {
+  username: "",
+  name: ""
+};
 
 /* --------------------------- Login Functions ------------------------------- */
 
@@ -14,12 +17,12 @@ let current_user = "";
 document.querySelector('form').addEventListener('submit', (event) => {
 
   console.log(`Trying to login`);
-  current_user = document.getElementById('username-field').value;
+  currentUser.username = document.getElementById('username-field').value;
 
-  if (current_user == null || current_user === undefined) { return; } // If null username, exit.
+  if (currentUser.username == null || currentUser.username === undefined) { return; } // If null username, exit.
 
   // Check if username exists on the server
-  fetch(`http://localhost:7777/api/users/${current_user}`)
+  fetch(`http://localhost:7777/api/users/${currentUser.username}`)
     .then(response => {
       if (!response.ok) {
         // Catches any http 4xx or 5xx errors
@@ -30,11 +33,17 @@ document.querySelector('form').addEventListener('submit', (event) => {
         throw new Error("Error fetching users. Check the address or connection");
       }
       else {
-        // Load the forum!
-        console.log("user found");
-        console.log("loading forum...");
-        setupForum();
+        return response.json();
       }
+    })
+    .then(data => {
+      // Finish setting up the currentUser object
+      currentUser.name = data.name;
+
+      // Load the forum!
+      console.log("user found");
+      console.log("loading forum...");
+      setupForum();
     })
     .catch(error => console.log(error));
 
@@ -46,10 +55,17 @@ const setupForum = () => {
   document.getElementById("login-block").classList.add('hidden'); // Hide login form
   document.getElementById("header").classList.remove('hidden');   // Display header and navbar
   document.getElementById("forum-block").classList.remove('hidden');  // Display empty forum block
-  document.getElementById("welcome-box").textContent += `${current_user}!`;   // Show logged in username
+  document.getElementById("welcome-box").textContent += `${currentUser.username}!`;   // Show logged in username
+
 
   fetchThreads(); // Try to fetch forum posts
   //window.setInterval(fetchPosts, 10000);
+
+  document.getElementById('new-thread-butt').addEventListener('click', (event) => {
+    console.log("New thread!");
+      //TODO create new thread here
+
+  }, false);
 };
 
 // Clear any error messages on input field focus
@@ -85,26 +101,25 @@ const fetchThreads = () => {
         return response.json();
       }
     })
-    .then(jsonData => populateThreadList(jsonData))
+    .then(data => {
+      // // Populate the thread list
+      console.log("Populating thread_list");
+
+      data.forEach(thread => {
+        // Create a new thread
+        let myThread = new Thread(thread.thread_title, thread.icon, thread.user, thread.id);
+
+        //TODO somewhere here? Check for username match and add a delete button
+        // Append thread to thread list
+        threadList.append(myThread.toDOM());
+      });
+
+      // Once populated, setup some click event listeners on each thread title
+      setupListeners();
+    })
     .catch(error => console.log(error));
 };
 
-// Populate the thread list with the fetched posts
-const populateThreadList = (data) => {
-  console.log("Populating thread_list");
-
-  data.forEach(thread => {
-    // Create a new thread
-    let myThread = new Thread(thread.thread_title, thread.icon, thread.user, thread.id);
-
-    // Append thread to thread list
-    threadList.append(myThread.toDOM());
-  });
-
-  // Once populated, setup some click event listeners on each thread title
-  setupListeners();
-
-};
 
 // Add listeners for thread title clicks
 const setupListeners = () => {
@@ -187,6 +202,14 @@ const fetchPostsForThread = (id, threadElement) => {
     </div>
   </form>`;
         threadElement.append(replyForm);
+
+        replyForm.getElementsByClassName('reply-button')[0].addEventListener('click', (event) => {
+          console.log("Post reply!");
+            //TODO create new post here
+            console.log(event.target);
+            //TODO first, check if the textinput is empty -> return
+
+        }, false);
       }
     })
     .catch(error => console.log(error));
