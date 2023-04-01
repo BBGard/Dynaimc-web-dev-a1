@@ -171,41 +171,24 @@ const fetchPostsForThread = (id, threadElement) => {
         }
       })
     })
+    .then( () => {
+      // Add a reply form if, not already added
+      if (threadElement.getElementsByTagName('form').length > 0) {
+        return;
+      }
+      else {
+        let replyForm = document.createElement('li');
+        // Disgusting, please forgive me...
+        replyForm.innerHTML = `<form class="reply-form">
+        <div class="reply-form-group">
+        <label for="reply-text" class="reply-label">Reply to post: </label>
+    <input type="text" name="reply-text" class="reply-text-field" required autocomplete="off">
+    <input type="submit" class="reply-button" value="Post"/>
+    </div>
+  </form>`;
+        threadElement.append(replyForm);
+      }
+    })
     .catch(error => console.log(error));
 
 };
-
-
-// const showPost = (data, element) => {
-//   console.log("Element");
-
-//   // if(threadTitles === undefined) return;
-//   console.log(element);
-
-//   //TODO Prevent adding already shown content
-//   // maybe wipe and start fresh?
-
-//   //TODO Close the thread on click
-
-//   // data.forEach(post => {
-//   //   let myPost = new Post(post.text, post.user, post.name);
-//   //   element.append(myPost.toDOM());
-
-//   // })
-
-//   for (let i=0; i<data.length; i++ ) {
-//     console.log("data");
-//     console.log(data);
-//     console.log(`data[i]: ${data[i]}`);
-//     console.log(`data[i].text: ${data[i].text}`);
-
-//     if(data[i].text === Thread.threadList[i].text) {
-//       console.log("Found the same thread!");
-//     }
-//     else {
-//       let myPost = new Post(data[i].text, data[i].user, data[i].name);
-//       element.append(myPost.toDOM());
-//     }
-//   }
-
-// }
