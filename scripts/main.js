@@ -79,11 +79,35 @@ const setupForum = () => {
 
   }, false);
 
-  // Add annoying logout popup to the welcome message button
-  document.getElementById('welcome-box').addEventListener('click', (event) => {
+  // Add some annoying popups to the header links
+  document.getElementById('navbar').addEventListener('click', (event) => {
     event.preventDefault();
-    console.log("logout");
-    window.alert("This is how you might log-out in a real app!")
+    console.log(event.target.tagName);
+
+    // return if not clicking a specific element
+    if(event.target.tagName === 'UL') {
+      return;
+    }
+
+    switch (event.target.textContent) {
+      case "Front-end":
+      case "The Front-end Forum":
+      case "Home":
+        window.alert("This link would take you home in a real app!");
+        break;
+      case "About":
+        window.alert("This link would take you to the about page in a real app!");
+        break;
+      case "Contact" :
+        window.alert("This link would take you to the contact page in a real app!");
+        break;
+      default:
+        if(event.target.textContent.includes("Welcome")) {
+          window.alert("This link would log the user out in a real app!");
+        }
+        break;
+    }
+
   }, false)
 };
 
