@@ -19,17 +19,13 @@ document.querySelector('form').addEventListener('submit', (event) => {
   console.log(`Trying to login`);
   currentUser.username = document.getElementById('username-field').value;
 
-  if (currentUser.username == null || currentUser.username === undefined) { return; } // If null username, exit.
+  if (currentUser.username == null || currentUser.username === undefined) { return; } // If null or undefined username, exit.
 
   // Check if username exists on the server
-  fetch(`http://localhost:7777/api/users/${currentUser.username}`)
+  fetch(`http://localhost:7777/api/users/`)
     .then(response => {
       if (!response.ok) {
         // Catches any http 4xx or 5xx errors
-        console.log("User not found");
-        error_message.classList.remove('hidden');
-        error_message.textContent = "We couldn't find that username. Please try again.";
-
         throw new Error("Error fetching users. Check the address or connection");
       }
       else {
@@ -37,13 +33,28 @@ document.querySelector('form').addEventListener('submit', (event) => {
       }
     })
     .then(data => {
-      // Finish setting up the currentUser object
-      currentUser.name = data.name;
+      // Build an array of usernames
+      let usernames = [];
+      data.forEach(user => {
+        usernames.push(user.username);
+      })
 
-      // Load the forum!
-      console.log("user found");
-      console.log("loading forum...");
-      setupForum();
+      // Check the array for the enetered username
+      if (usernames.includes(currentUser.username)) {
+        // Finish setting up the current user object
+        currentUser.name = data.name;
+
+        // Load the forum!
+        console.log("user found");
+        console.log("loading forum...");
+        setupForum();
+      }
+      else {
+        console.log("User not found");
+        error_message.classList.remove('hidden');
+        error_message.textContent = "We couldn't find that username. Please try again.";
+      }
+
     })
     .catch(error => console.log(error));
 
@@ -64,7 +75,7 @@ const setupForum = () => {
   document.getElementById('new-thread-butt').addEventListener('click', (event) => {
     event.preventDefault();
     console.log("New thread!");
-      //TODO create new thread here
+    //TODO create new thread here
 
   }, false);
 };
@@ -135,9 +146,9 @@ const setupListeners = () => {
       event.preventDefault();
 
       // Hide or show the posts
-       let threadElement = threadList.getElementsByTagName('ul')[index];
+      let threadElement = threadList.getElementsByTagName('ul')[index];
 
-      if(threadElement.classList.contains('hidden')) {
+      if (threadElement.classList.contains('hidden')) {
         threadElement.classList.remove('hidden');
       }
       else {
@@ -145,7 +156,7 @@ const setupListeners = () => {
       }
 
       // Fetch the posts from the server
-      fetchPostsForThread(index+1, threadElement);
+      fetchPostsForThread(index + 1, threadElement);
 
     });
   });
@@ -154,7 +165,7 @@ const setupListeners = () => {
 // Attempt to fetch posts for thread "id" and append to "threadElement"
 const fetchPostsForThread = (id, threadElement) => {
   // Get the thread being referenced
-  let myThread = Thread.threadList[id-1];
+  let myThread = Thread.threadList[id - 1];
 
   console.log(`Fetching posts for thread: ${id}`);
   fetch(`http://localhost:7777/api/threads/${id}/posts`)
@@ -176,7 +187,7 @@ const fetchPostsForThread = (id, threadElement) => {
         myPostElement.classList.add('post'); // Add some styling
 
         // Check if the post already exists
-        if(myThread.postList.some(p => p.text === myPost.text)) {
+        if (myThread.postList.some(p => p.text === myPost.text)) {
           // If post exists, return
           return;
         }
@@ -187,7 +198,7 @@ const fetchPostsForThread = (id, threadElement) => {
         }
       })
     })
-    .then( () => {
+    .then(() => {
       // Add a reply form if, not already added
       if (threadElement.getElementsByTagName('form').length > 0) {
         return;
@@ -207,9 +218,9 @@ const fetchPostsForThread = (id, threadElement) => {
         replyForm.getElementsByClassName('reply-button')[0].addEventListener('click', (event) => {
           event.preventDefault();
           console.log("Post reply!");
-            //TODO create new post here
-            console.log(event.target);
-            //TODO first, check if the textinput is empty -> return
+          //TODO create new post here
+          console.log(event.target);
+          //TODO first, check if the textinput is empty -> return
 
         }, false);
       }
