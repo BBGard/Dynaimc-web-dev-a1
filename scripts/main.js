@@ -69,15 +69,22 @@ const setupForum = () => {
   document.getElementById("welcome-box").textContent += `${currentUser.username}!`;   // Show logged in username
 
 
-  fetchThreads(); // Try to fetch forum posts
-  //window.setInterval(fetchPosts, 10000);
+  fetchThreads(); // Try to fetch forum threads
 
+  // Add event listener to the 'new thread' button
   document.getElementById('new-thread-butt').addEventListener('click', (event) => {
     event.preventDefault();
     console.log("New thread!");
     //TODO create new thread here
 
   }, false);
+
+  // Add annoying logout popup to the welcome message button
+  document.getElementById('welcome-box').addEventListener('click', (event) => {
+    event.preventDefault();
+    console.log("logout");
+    window.alert("This is how you might log-out in a real app!")
+  }, false)
 };
 
 // Clear any error messages on input field focus
