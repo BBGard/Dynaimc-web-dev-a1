@@ -1,11 +1,12 @@
 export class Post {
-  constructor(text, user, name) {
+  constructor(text, username, name) {
     this.text = text;
-    this.user = user;
+    this.user = username;
     this.name = name;
     // this.id = id;
   }
 
+  // returns a list element representing the post
   toDOM() {
     const html = document.createElement('li');
 
@@ -20,4 +21,5 @@ export class Post {
 
     return html;
   }
+
 }

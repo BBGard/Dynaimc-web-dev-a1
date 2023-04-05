@@ -198,8 +198,16 @@ const fetchPostsForThread = (id, threadElement) => {
   let myThread = Thread.threadList[id - 1];
 
   console.log(`Fetching posts for thread: ${id}`);
-
-  // Fetch the posts
+  // fetch(`http://localhost:7777/api/threads/${id}/posts`)
+  //   .then(response => {
+  //     if (!response.ok) {
+  //       // Catches any http 4xx or 5xx errors
+  //       throw new Error("Error fetching posts. Check the address or connection.");
+  //     }
+  //     else {
+  //       return response.json();
+  //     }
+  //   })
   fetchPosts(id)
     .then(data => {
       // Create post, attach to correct thread, hide
@@ -216,100 +224,52 @@ const fetchPostsForThread = (id, threadElement) => {
         }
         else {
           // Add the post to the thread
-          const formElement = threadElement.querySelector('form.reply-form');
-          if (formElement) {
-            // If the reply form is there, append above it
-            threadElement.insertBefore(myPostElement, formElement);
-          }
-          else {
-            // Otherwise chuck it on the end
-            threadElement.append(myPostElement);
-          }
-
+          threadElement.append(myPostElement);
           myThread.postList.push(myPost);
         }
       })
     })
     .then(() => {
       // Add a reply form if, not already added
-      addReplyFormIfNeeded(threadElement, id);
-    })
-    .catch(error => console.log(error));
-
-};
-
-// Checks if reply form exists, adds one if not
-const addReplyFormIfNeeded = (threadElement, id) => {
-
-  if (threadElement.querySelector('form.reply-form')) {
-    return;
-  }
-  else {
-
-    const replyForm = createReplyFormElement();
-    threadElement.append(replyForm);
-
-    // Add click listener to the reply button
-    const replyButton = replyForm.querySelector('.reply-button');
-
-    replyButton.addEventListener('click', (event) => {
-      event.preventDefault();
-      // Get the value of the input box
-      const input = replyForm.getElementsByClassName("reply-text-field");
-
-      // return if empty
-      if(input[0].value.length == 0) {
+      if (threadElement.getElementsByTagName('form').length > 0) {
         return;
       }
       else {
-        console.log("Post reply!");
-        // Create a new post
-        const post = new Post(input[0].value, currentUser.username, currentUser.name);
+        let replyForm = document.createElement('li');
+        // Disgusting, please forgive me...
+        replyForm.innerHTML = `<form class="reply-form">
+        <div class="reply-form-group">
+        <label for="reply-text" class="reply-label">Reply to post: </label>
+    <input type="text" name="reply-text" class="reply-text-field" required autocomplete="off">
+    <input type="submit" class="reply-button" value="Post"/>
+    </div>
+  </form>`;
+        threadElement.append(replyForm);
 
-        // Clear the input
-        input[0].value = "";
+        // Add click listener to the reply button
+        replyForm.getElementsByClassName('reply-button')[0].addEventListener('click', (event) => {
+          event.preventDefault();
 
-        // Try to post it
-        submitNewPost(post, id, threadElement);
+          // Get the value of the input box
+          const input = replyForm.getElementsByClassName("reply-text-field");
+
+          // return if empty
+          if(input[0].value.length == 0) {
+            return;
+          }
+          else {
+            console.log("Post reply!");
+            // Create a new post
+            const post = new Post(input[0].value, currentUser.username, currentUser.name);
+
+            // Try to post it
+            submitNewPost(post, id);
+          }
+        }, false);
       }
-    }, false);
-  }
-};
+    })
+    .catch(error => console.log(error));
 
-// Creates a reply form to attach to a post
-const createReplyFormElement = () => {
-  // Form
-  const form = document.createElement('form');
-  form.classList.add('reply-form');
-
-  // Form group
-  const formGroup = document.createElement('div');
-  formGroup.classList.add('reply-form-group');
-  form.append(formGroup);
-
-  // Label
-  const label = document.createElement('label');
-  label.classList.add('reply-label');
-  label.textContent = "Reply to post:";
-  formGroup.append(label);
-
-  // Text input field
-  const textField = document.createElement('input');
-  textField.type = 'text';
-  textField.name = 'reply-text';
-  textField.classList.add('reply-text-field');
-  textField.required = true;
-  textField.autocomplete = 'off';
-  formGroup.append(textField);
-
-  // Reply button
-  const button = document.createElement('input');
-  button.type = 'submit';
-  button.classList.add('reply-button');
-  button.value = "Post";
-  formGroup.append(button);
-
-  return form;
 };
 
 // Fetches posts for a specified thread id
@@ -326,9 +286,87 @@ const fetchPosts = (id) => {
     });
 }
 
+// Attempt to fetch posts for thread "id" and append to "threadElement"
+// const fetchPostsForThread = (id, threadElement) => {
+//   // Get the thread being referenced
+//   let myThread = Thread.threadList[id - 1];
+
+//   console.log(`Fetching posts for thread: ${id}`);
+//   fetch(`http://localhost:7777/api/threads/${id}/posts`)
+//     .then(response => {
+//       if (!response.ok) {
+//         // Catches any http 4xx or 5xx errors
+//         throw new Error("Error fetching posts. Check the address or connection.");
+//       }
+//       else {
+//         return response.json();
+//       }
+//     })
+//     .then(data => {
+//       // Create post, attach to correct thread, hide
+//       data.forEach(post => {
+//         // Create a new post
+//         let myPost = new Post(post.text, post.user, post.name);
+//         let myPostElement = myPost.toDOM();
+//         myPostElement.classList.add('post'); // Add some styling
+
+//         // Check if the post already exists
+//         if (myThread.postList.some(p => p.text === myPost.text)) {
+//           // If post exists, return
+//           return;
+//         }
+//         else {
+//           // Add the post to the thread
+//           threadElement.append(myPostElement);
+//           myThread.postList.push(myPost);
+//         }
+//       })
+//     })
+//     .then(() => {
+//       // Add a reply form if, not already added
+//       if (threadElement.getElementsByTagName('form').length > 0) {
+//         return;
+//       }
+//       else {
+//         let replyForm = document.createElement('li');
+//         // Disgusting, please forgive me...
+//         replyForm.innerHTML = `<form class="reply-form">
+//         <div class="reply-form-group">
+//         <label for="reply-text" class="reply-label">Reply to post: </label>
+//     <input type="text" name="reply-text" class="reply-text-field" required autocomplete="off">
+//     <input type="submit" class="reply-button" value="Post"/>
+//     </div>
+//   </form>`;
+//         threadElement.append(replyForm);
+
+//         // Add click listener to the reply button
+//         replyForm.getElementsByClassName('reply-button')[0].addEventListener('click', (event) => {
+//           event.preventDefault();
+
+//           // Get the value of the input box
+//           const input = replyForm.getElementsByClassName("reply-text-field");
+
+//           // return if empty
+//           if(input[0].value.length == 0) {
+//             return;
+//           }
+//           else {
+//             console.log("Post reply!");
+//             // Create a new post
+//             const post = new Post(input[0].value, currentUser.username, currentUser.name);
+
+//             // Try to post it
+//             submitNewPost(post, id);
+//           }
+//         }, false);
+//       }
+//     })
+//     .catch(error => console.log(error));
+
+// };
 
 // Attempts to POST a new post to the correct thread
-const submitNewPost = (post, id, threadElement) => {
+const submitNewPost = (post, id) => {
 
   fetch(`http://localhost:7777/api/threads/${id}/posts`, {
     method: 'POST',
@@ -336,13 +374,15 @@ const submitNewPost = (post, id, threadElement) => {
     body: JSON.stringify({user: post.user, text:post.text})
   })
     .then(response => response.json())
-    .then(() => {
-      // TODO refresh the posts
-      console.log("refresh");
-      fetchPostsForThread(id, threadElement);
-    })
+    .then(data => console.log(data))
     .catch(error => console.log(error));
 
-
+    // TODO refresh the posts
+    refreshPosts(id);
 
 };
+
+// Attempts to refresh the posts at a given thread id
+const refreshPosts = (id) => {
+
+}
