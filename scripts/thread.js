@@ -31,6 +31,7 @@ export class Thread {
     html.append(user);
 
     const posts = document.createElement('ul');
+    posts.classList.add('post-list');
     posts.classList.add('hidden');  // Hide posts for now
     html.append(posts);
 

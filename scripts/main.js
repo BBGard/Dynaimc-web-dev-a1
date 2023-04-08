@@ -1,5 +1,5 @@
-import { Thread } from "./Thread.js";
-import { Post } from "./Post.js";
+import { Thread } from "./thread.js";
+import { Post } from "./post.js";
 
 /* --------------------------- Login Variables ------------------------------- */
 // For showing user error messages on the login form
@@ -103,35 +103,38 @@ const setupForum = () => {
     toggleNewThreadForm();
   }, false);
 
-  // Add a click listener to the thread list for title clicks
+  // Add a click listener to the thread list to catch title clicks
   threadList.addEventListener('click', (event) => {
+    event.preventDefault();
 
     // Check if the click event originated from a thread title element
     if (event.target.classList.contains("thread-title")) {
-      event.preventDefault();
-
+      console.log("It came from a thread title");
       // Get the index of the clicked thread title
       let index = Array.from(event.target.parentNode.parentNode.children).indexOf(event.target.parentNode);
-
+      console.log(`Index is: ${index}`);
       // Hide or show the posts
       let threadElement = threadList.getElementsByTagName('ul')[index];
       let id = index + 1; // The post id for fetching
 
       if (threadElement.classList.contains('hidden')) {
         threadElement.classList.remove('hidden');
+        console.log("Posts were hidden, showing");
 
+        // Fetch the posts from the server
+        fetchPostsForThread(id, threadElement);
         // Trigger 10 second timer to refresh posts
         startRefreshTimer(id, threadElement);
       }
       else {
         threadElement.classList.add('hidden');
-
+        console.log("posts where showing, hiding now");
         // Stop the refresh timer
         stopRefreshTimer();
       }
 
       // Fetch the posts from the server
-      fetchPostsForThread(id, threadElement);
+      // fetchPostsForThread(id, threadElement);
     }
   }, false);
 
@@ -226,32 +229,40 @@ const fetchThreads = () => {
 const fetchPostsForThread = (id, threadElement) => {
   // Get the thread being referenced
   let myThread = Thread.threadList[id - 1];
-  console.log("myThread");
-  // console.log(myThread);
 
   console.log(`Fetching posts for thread: ${id}`);
 
   fetchPosts(id)
     .then(data => {
       // Create post, attach to correct thread, hide
-      console.log("got post");
+      console.log("got posts");
       // console.log(data);
       data.forEach(post => {
-        // Create a new post
-        let myPost = new Post(post.text, post.user, post.name);
-        let myPostElement = myPost.toDOM();
-        myPostElement.classList.add('post'); // Add some styling
-
         // Check if the post already exists
-        if (myThread.postList.some(p => p.text === myPost.text)) {
+        const postList = document.querySelectorAll('.post-content');
+        // console.log("postList");
+        // console.log(postList);
+
+        if (Array.from(postList).some(elem => elem.textContent
+            === post.text)) { // TODO And check name?
           // If post exists, return
-          console.log("post exists");
-          console.log(myThread.postList);
+          // console.log("Post exists already");
           return;
         }
         else {
+          // Create a new post
+          let myPost = new Post(post.text, post.user, post.name);
+          let myPostElement = myPost.toDOM();
+          myPostElement.classList.add('post'); // Add some styling
+
           // Add the post to the thread
-          const formElement = threadElement.querySelector('form.reply-form');
+          const formElement = threadElement.querySelector('reply-form');
+          console.log("Debugs");
+          console.log("Form element");
+          console.log(formElement);
+          console.log("threadElement");
+          console.log(threadElement);
+
           if (formElement) {
             // If the reply form is there, append above it
             console.log("form");
@@ -278,8 +289,8 @@ const fetchPostsForThread = (id, threadElement) => {
 
 // Checks if reply form exists, adds one if not
 const addReplyFormIfNeeded = (threadElement, id) => {
-
-  if (threadElement.querySelector('form.reply-form')) {
+  //TODO Fix this shit! Not detecting reply form
+  if (threadElement.querySelector('reply-form')) {
     return;
   }
   else {

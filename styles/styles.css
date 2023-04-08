@@ -149,6 +149,7 @@ nav {
 
 #title span, .logo a span {
   background: -webkit-linear-gradient(var(--color-green), var(--color-blue));
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
