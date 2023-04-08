@@ -38,21 +38,22 @@ export class Thread {
     return html;
   }
 
+  // TODO remove
   // Add a new post to this threads post array
-  addPost(post) {
-    this.postList.push(post);
-  }
+  // addPost(post) {
+  //   this.postList.push(post);
+  // }
 
   // Return the JSON stringified version of this thread
   // Note this only gets the "text" from the latest post
-  stringifyLatest() {
-    return JSON.stringify(
-      {
-        user: this.user,
-        thread_title: this.thread_title,
-        icon: this.icon,
-        text: this.postList[this.postList.length-1].text
-      });
-  }
+  // stringifyLatest() {
+  //   return JSON.stringify(
+  //     {
+  //       user: this.user,
+  //       thread_title: this.thread_title,
+  //       icon: this.icon,
+  //       text: this.postList[this.postList.length-1].text
+  //     });
+  // }
 
 }

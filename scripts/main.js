@@ -73,6 +73,9 @@ const threadList = document.getElementById("thread-list");
 // Refresh timer, for refreshing forum posts
 let refreshTimer;
 
+// Local posts object
+let localPostList;
+
 // Hides login and displays forum page
 const setupForum = () => {
   document.getElementById("login-block").classList.add('hidden'); // Hide login form
@@ -109,10 +112,8 @@ const setupForum = () => {
 
     // Check if the click event originated from a thread title element
     if (event.target.classList.contains("thread-title")) {
-      console.log("It came from a thread title");
       // Get the index of the clicked thread title
       let index = Array.from(event.target.parentNode.parentNode.children).indexOf(event.target.parentNode);
-      console.log(`Index is: ${index}`);
       // Hide or show the posts
       let threadElement = threadList.getElementsByTagName('ul')[index];
       let id = index + 1; // The post id for fetching
@@ -235,33 +236,37 @@ const fetchPostsForThread = (id, threadElement) => {
   fetchPosts(id)
     .then(data => {
       // Create post, attach to correct thread, hide
-      console.log("got posts");
+      console.log(`Got ${data.length} posts`);
       // console.log(data);
       data.forEach(post => {
+
+        // Count post elements
+        const postCount = threadElement.querySelectorAll('li').length;
+        console.log(`Post elements: ${postCount}`);
+        console.log(`Thread posts: ${myThread.postList.length}`);
+        console.log(myThread.postList);
+
         // Check if the post already exists
         const postList = document.querySelectorAll('.post-content');
-        // console.log("postList");
-        // console.log(postList);
 
-        if (Array.from(postList).some(elem => elem.textContent
-            === post.text)) { // TODO And check name?
-          // If post exists, return
-          // console.log("Post exists already");
+        // if (Array.from(postList).some(elem => elem.textContent
+        //     === post.text)) { // TODO And check name?
+        //   // If post exists, return
+        //   return;
+        // }
+        if(myThread.postList.length === data.length) {
+          console.log("Same posts");
           return;
         }
         else {
           // Create a new post
+          //TODO fix suing first post text on reply??
           let myPost = new Post(post.text, post.user, post.name);
           let myPostElement = myPost.toDOM();
           myPostElement.classList.add('post'); // Add some styling
 
           // Add the post to the thread
           const formElement = threadElement.querySelector('.reply-form');
-          console.log("Debugs");
-          console.log("Form element");
-          console.log(formElement);
-          console.log("threadElement");
-          console.log(threadElement);
 
           if (formElement) {
             // If the reply form is there, append above it
@@ -289,9 +294,6 @@ const fetchPostsForThread = (id, threadElement) => {
 
 // Checks if reply form exists, adds one if not
 const addReplyFormIfNeeded = (threadElement, id) => {
-  //TODO Fix this shit! Not detecting reply form
-  console.log("threadelement");
-  console.log(threadElement);
   if (threadElement.querySelector('.reply-form')) {
     return;
   }
@@ -438,26 +440,32 @@ const createNewThread = () => {
   //Create the post within the thread
   const postText = document.getElementById('thread-text-field').value;
 
-  const myNewPost = new Post(postText, currentUser.username, currentUser.name);
+  //const myNewPost = new Post(postText, currentUser.username, currentUser.name);
 
   // Add post to the thread
-  myNewThread.addPost(myNewPost);
+  //myNewThread.addPost(myNewPost);
 
   // POST the new thread
-  postNewThread(id, myNewThread);
+  postNewThread(id, myNewThread, postText);
 
   // Clear form fields
   document.getElementById('thread-title-field').value = "";
   document.getElementById('thread-text-field').value = "";
 }
 
-const postNewThread = (id, thread) => {
+const postNewThread = (id, thread, firstPost) => {
   console.log("Posting new thread");
 
   fetch(`http://localhost:7777/api/threads`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: thread.stringifyLatest()
+    body: JSON.stringify(
+      {
+        user: thread.user,
+        thread_title: thread.thread_title,
+        icon: thread.icon,
+        text: firstPost
+      })
   })
     .then(response => response.json())
     .then(() => {
