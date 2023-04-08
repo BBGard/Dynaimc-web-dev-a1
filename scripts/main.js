@@ -256,7 +256,7 @@ const fetchPostsForThread = (id, threadElement) => {
           myPostElement.classList.add('post'); // Add some styling
 
           // Add the post to the thread
-          const formElement = threadElement.querySelector('reply-form');
+          const formElement = threadElement.querySelector('.reply-form');
           console.log("Debugs");
           console.log("Form element");
           console.log(formElement);
@@ -290,7 +290,9 @@ const fetchPostsForThread = (id, threadElement) => {
 // Checks if reply form exists, adds one if not
 const addReplyFormIfNeeded = (threadElement, id) => {
   //TODO Fix this shit! Not detecting reply form
-  if (threadElement.querySelector('reply-form')) {
+  console.log("threadelement");
+  console.log(threadElement);
+  if (threadElement.querySelector('.reply-form')) {
     return;
   }
   else {
