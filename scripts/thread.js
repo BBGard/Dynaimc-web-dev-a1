@@ -13,6 +13,7 @@ export class Thread {
     Thread.threadList.push(this);
   }
 
+  // Return a DOM representation of this thread
   toDOM() {
     const html = document.createElement('li');
     html.classList.add('thread'); // Styling
@@ -21,6 +22,7 @@ export class Thread {
     const title = document.createElement('a');
     title.textContent = `${this.thread_title}`;
     title.href = `http://localhost:4505/index?id=${this.id}`;
+    title.classList.add('thread-title');
     html.append(title);
 
     const user = document.createElement('p');
@@ -35,7 +37,21 @@ export class Thread {
     return html;
   }
 
+  // Add a new post to this threads post array
   addPost(post) {
     this.postList.push(post);
   }
+
+  // Return the JSON stringified version of this thread
+  // Note this only gets the "text" from the latest post
+  stringifyLatest() {
+    return JSON.stringify(
+      {
+        user: this.user,
+        thread_title: this.thread_title,
+        icon: this.icon,
+        text: this.postList[this.postList.length-1].text
+      });
+  }
+
 }

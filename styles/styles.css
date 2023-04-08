@@ -1,119 +1,10 @@
-/***
-    The new CSS reset - version 1.8.4 (last updated 14.2.2023)
-    GitHub page: https://github.com/elad2412/the-new-css-reset
-***/
-
-/*
-    Remove all the styles of the "User-Agent-Stylesheet", except for the 'display' property
-    - The "symbol *" part is to solve Firefox SVG sprite bug
- */
-*:where(:not(html, iframe, canvas, img, svg, video, audio):not(svg *, symbol *)) {
-  all: unset;
-  display: revert;
-}
-
-/* Preferred box-sizing value */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-/* Reapply the pointer cursor for anchor tags */
-a, button {
-  cursor: revert;
-}
-
-/* Remove list styles (bullets/numbers) */
-ol, ul, menu {
-  list-style: none;
-}
-
-/* For images to not be able to exceed their container */
-img {
-  max-inline-size: 100%;
-  max-block-size: 100%;
-}
-
-/* removes spacing between cells in tables */
-table {
-  border-collapse: collapse;
-}
-
-/* Safari - solving issue when using user-select:none on the <body> text input doesn't working */
-input, textarea {
-  -webkit-user-select: auto;
-}
-
-/* revert the 'white-space' property for textarea elements on Safari */
-textarea {
-  white-space: revert;
-}
-
-/* minimum style to allow to style meter element */
-meter {
-  -webkit-appearance: revert;
-  appearance: revert;
-}
-
-/* preformatted text - use only for this feature */
-:where(pre) {
-  all: revert;
-}
-
-/* reset default text opacity of input placeholder */
-::placeholder {
-  color: unset;
-}
-
-/* remove default dot (•) sign */
-::marker {
-  content: initial;
-}
-
-/* fix the feature of 'hidden' attribute.
- display:revert; revert to element instead of attribute */
-:where([hidden]) {
-  display: none;
-}
-
-/* revert for bug in Chromium browsers
- - fix for the content editable attribute will work properly.
- - webkit-user-select: auto; added for Safari in case of using user-select:none on wrapper element*/
-:where([contenteditable]:not([contenteditable="false"])) {
-  -moz-user-modify: read-write;
-  -webkit-user-modify: read-write;
-  overflow-wrap: break-word;
-  -webkit-line-break: after-white-space;
-  -webkit-user-select: auto;
-}
-
-/* apply back the draggable feature - exist only in Chromium and Safari */
-:where([draggable="true"]) {
-  -webkit-user-drag: element;
-}
-
-/* Revert Modal native behavior */
-:where(dialog:modal) {
-  all: revert;
-}
-
-/* -------------------------------- END RESET ------------------------------- */
-/* --------------------------------------------------------------------------- */
-
-
-/***
-    The following code is by Benjamin Gardiner, unless otherwise stated.
-***/
+/* Import resets */
+@import "./normalize.css";
+@import "./resets.css";
 
 /* --------------------------- General Styling -----------------------------*/
 :root {
   /* Declare variables for later */
-  /* --clr-bg:#1F271B;
-  --clr-font: #F3FCF0;
-  --clr1: #FFD23F;
-  --clr2: #EE4266;
-  --clr3: #540D6E; */
   /* --color-bg: #ffffff; */
   --color-white: #ffffff;
   --color-offwhite: #f3f3f3;
@@ -125,6 +16,7 @@ meter {
   --color-green: #42d392;
   --color-darkgreen: #33a06f;
   --color-red: #ff0048;
+  --color-darkred: #a1002e;
   --font-body: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   --font-heading: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
 }
@@ -268,14 +160,14 @@ nav {
   color: var(--color-darkblue);
 }
 
-#login-box {
+#login-box, #new-thread-block {
   margin: 0 auto;
-  min-width: 420px;
+  min-width: 320px;
   width: 75%;
   max-width: 576px;
 }
 
-#login-box h2 {
+#login-box h2, #new-thread-form h2 {
   text-align: center;
   margin-bottom: 1rem;
   color: var(--color-white);
@@ -307,7 +199,6 @@ form {
 .form-control {
   display: block;
   width: 100%;
-  height: 3rem;
   padding: 0.375rem 0.75rem;
   color: var(--color-darkblue);
   font-size: 1rem;
@@ -319,10 +210,14 @@ form {
   transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
+input {
+  height: 3rem;
+}
+
 .form-control:hover {
   border: solid var(--color-white) 2px;
   box-shadow: 0 0 5px var(--color-green);
-  font-weight: 500;
+  font-weight: 100;
 }
 
 .form-control:focus {
@@ -331,16 +226,21 @@ form {
 }
 
 input, button, select, textarea {
-  margin: 0;
+  /* margin: 0; */
   font-family: inherit;
   font-size: inherit;
   line-height: inherit;
 }
 
-.submit-button {
-  display: block;
+.button-group {
+  text-align: center;
+}
+
+.submit-button, .cancel-button {
+  display: inline-block;
   margin: 0 auto;
-  width: 100%;
+  width: 40%;
+  /* width: 100%; */
   font-size: 1.2rem;
   font-weight: 600;
   text-align: center;
@@ -352,13 +252,14 @@ input, button, select, textarea {
   border-radius: 5px;
   cursor: pointer;
   transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
 
+#login-button {
+  width: 100%;
 }
 
 .submit-button:hover {
-  border: solid var(--color-white) 3px;
   box-shadow: 0 0 5px var(--color-green);
-  font-weight: 800;
   background-color: var(--color-darkgreen);
 }
 
@@ -368,18 +269,11 @@ input, button, select, textarea {
 
 /* --------------------------- Forum Styling -----------------------------*/
 
-/* .forum-container {
-  margin: 0 auto;
-  background-color: rgb(228, 228, 228);
-} */
-
-
-
 
 #forum-block {
   margin: 3% auto;
   padding: 1rem;
-  min-width: 420px;
+  min-width: 320px;
   width: 75%;
   max-width: 900px;
   background-color: var(--color-offwhite);
@@ -548,6 +442,35 @@ input, button, select, textarea {
   box-shadow: 0 0 5px var(--color-green);
   background-color: var(--color-darkgreen);
 }
+/* ------------ END Post Reply Form -------------- */
+
+/* New Thread Form */
+#new-thread-form {
+  background-color: var(--color-blue);
+}
+
+label {
+  color: var(--color-white);
+}
+
+#new-thread-form input, #new-thread-form textarea {
+  margin-top: 0.4rem;
+  box-shadow: none;
+}
+
+.cancel-button {
+  font-weight: 400;
+  background: var(--color-red);
+  margin-right: 10%;
+}
+
+.cancel-button:hover {
+  box-shadow: 0 0 5px var(--color-red);
+  background-color: var(--color-darkred);
+}
+
+
+
 
 /* MEDIA QUERIES */
 /* @media (min-width: 576px) {
@@ -578,5 +501,10 @@ input, button, select, textarea {
     height: 4px;
     margin-bottom: 5px;
     background-color: var(--color-white);
+  }
+
+  .submit-button, .cancel-button {
+    display: block;
+    width: 100%;
   }
 }

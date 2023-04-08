@@ -22,4 +22,13 @@ export class Post {
     return html;
   }
 
+  // Return the JSON stringified version of this post
+  stringify() {
+    return JSON.stringify(
+      {
+        user: this.user,
+        text: this.text
+      });
+  }
+
 }

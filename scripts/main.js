@@ -14,7 +14,7 @@ let currentUser = {
 /* --------------------------- Login Functions ------------------------------- */
 
 // Setup the event listener on the submit button of the login form
-document.querySelector('form').addEventListener('submit', (event) => {
+document.getElementById('login-form').addEventListener('submit', (event) => {
 
   console.log(`Trying to login`);
   currentUser.username = document.getElementById('username-field').value;
@@ -61,6 +61,18 @@ document.querySelector('form').addEventListener('submit', (event) => {
   event.preventDefault();
 }, false);
 
+/* --------------------------- END Login Functions ------------------------------- */
+/* --------------------------- ------------------- ------------------------------- */
+
+/* --------------------------- Forum Variables ------------------------------- */
+/*  Declared here for neatness, keeping in mind hoisting will pull them up    */
+
+// Get thread list element from page
+const threadList = document.getElementById("thread-list");
+
+// Refresh timer, for refreshing forum posts
+let refreshTimer;
+
 // Hides login and displays forum page
 const setupForum = () => {
   document.getElementById("login-block").classList.add('hidden'); // Hide login form
@@ -74,18 +86,62 @@ const setupForum = () => {
   // Add event listener to the 'new thread' button
   document.getElementById('new-thread-butt').addEventListener('click', (event) => {
     event.preventDefault();
-    console.log("New thread!");
-    //TODO create new thread here
+    toggleNewThreadForm();
 
+  }, false);
+
+  // Setup listener on "Create Thread" button in new thread form
+  document.getElementById('new-thread-form').addEventListener('submit', (event) => {
+    event.preventDefault();
+    createNewThread();
+
+  }, false);
+
+  // Listener for cancel button in create new thread form
+  document.getElementById('cancel-button').addEventListener('click', (event) => {
+    event.preventDefault();
+    toggleNewThreadForm();
+  }, false);
+
+  // Add a click listener to the thread list for title clicks
+  threadList.addEventListener('click', (event) => {
+
+    // Check if the click event originated from a thread title element
+    if (event.target.classList.contains("thread-title")) {
+      event.preventDefault();
+
+      // Get the index of the clicked thread title
+      let index = Array.from(event.target.parentNode.parentNode.children).indexOf(event.target.parentNode);
+
+      // Hide or show the posts
+      let threadElement = threadList.getElementsByTagName('ul')[index];
+      let id = index + 1; // The post id for fetching
+
+      if (threadElement.classList.contains('hidden')) {
+        threadElement.classList.remove('hidden');
+
+        // Trigger 10 second timer to refresh posts
+        startRefreshTimer(id, threadElement);
+      }
+      else {
+        threadElement.classList.add('hidden');
+
+        // Stop the refresh timer
+        stopRefreshTimer();
+      }
+
+      // Fetch the posts from the server
+      fetchPostsForThread(id, threadElement);
+    }
   }, false);
 
   // Add some annoying popups to the header links
   document.getElementById('navbar').addEventListener('click', (event) => {
     event.preventDefault();
-    console.log(event.target.tagName);
+    // console.log(event.target.tagName);
 
     // return if not clicking a specific element
-    if(event.target.tagName === 'UL') {
+    if (event.target.tagName === 'UL') {
       return;
     }
 
@@ -98,18 +154,19 @@ const setupForum = () => {
       case "About":
         window.alert("This link would take you to the about page in a real app!");
         break;
-      case "Contact" :
+      case "Contact":
         window.alert("This link would take you to the contact page in a real app!");
         break;
       default:
-        if(event.target.textContent.includes("Welcome")) {
+        if (event.target.textContent.includes("Welcome")) {
           window.alert("This link would log the user out in a real app!");
         }
         break;
     }
 
-  }, false)
+  }, false);
 };
+
 
 // Clear any error messages on input field focus
 document.getElementById('username-field').addEventListener('focus', (event) => {
@@ -119,14 +176,7 @@ document.getElementById('username-field').addEventListener('focus', (event) => {
 }, false);
 
 
-/* --------------------------- END Login Functions ------------------------------- */
-/* --------------------------- ------------------- ------------------------------- */
 
-/* --------------------------- Forum Variables ------------------------------- */
-/*  Declared here for neatness, keeping in mind hoisting will pull them up    */
-
-// Get thread list element from page
-const threadList = document.getElementById("thread-list");
 
 
 /* --------------------------- Forum Functions ------------------------------- */
@@ -147,62 +197,45 @@ const fetchThreads = () => {
     .then(data => {
       // // Populate the thread list
       console.log("Populating thread_list");
-
+      console.log(data);
       data.forEach(thread => {
-        // Create a new thread
-        let myThread = new Thread(thread.thread_title, thread.icon, thread.user, thread.id);
 
         //TODO somewhere here? Check for username match and add a delete button
-        // Append thread to thread list
-        threadList.append(myThread.toDOM());
-      });
 
-      // Once populated, setup some click event listeners on each thread title
-      setupListeners();
+        // Check if the thread already exists
+        if (Array.from(threadList.children).some(
+          elem => elem.querySelector('.thread-title').textContent
+            === thread.thread_title)) {
+          // If thread exists, return
+          console.log("Thread exists already");
+          return;
+        }
+        else {
+          // Create a new thread
+          let myThread = new Thread(thread.thread_title, thread.icon, thread.user, thread.id);
+
+          // Append thread to thread list
+          threadList.append(myThread.toDOM());
+        }
+
+      });
     })
     .catch(error => console.log(error));
-};
-
-
-// Add listeners for thread title clicks
-const setupListeners = () => {
-  // Create a list of thread titles
-  let threadTitles = Array.from(threadList.getElementsByTagName("a"));
-  console.log("adding listeners");
-
-  // Add a listener to each thread title
-  //TODO maybe add one listener and use bubbling?
-  threadTitles.forEach((title, index) => {
-    title.addEventListener("click", (event) => {
-      event.preventDefault();
-
-      // Hide or show the posts
-      let threadElement = threadList.getElementsByTagName('ul')[index];
-
-      if (threadElement.classList.contains('hidden')) {
-        threadElement.classList.remove('hidden');
-      }
-      else {
-        threadElement.classList.add('hidden');
-      }
-
-      // Fetch the posts from the server
-      fetchPostsForThread(index + 1, threadElement);
-
-    });
-  });
 };
 
 const fetchPostsForThread = (id, threadElement) => {
   // Get the thread being referenced
   let myThread = Thread.threadList[id - 1];
+  console.log("myThread");
+  // console.log(myThread);
 
   console.log(`Fetching posts for thread: ${id}`);
 
-  // Fetch the posts
   fetchPosts(id)
     .then(data => {
       // Create post, attach to correct thread, hide
+      console.log("got post");
+      // console.log(data);
       data.forEach(post => {
         // Create a new post
         let myPost = new Post(post.text, post.user, post.name);
@@ -212,6 +245,8 @@ const fetchPostsForThread = (id, threadElement) => {
         // Check if the post already exists
         if (myThread.postList.some(p => p.text === myPost.text)) {
           // If post exists, return
+          console.log("post exists");
+          console.log(myThread.postList);
           return;
         }
         else {
@@ -219,10 +254,12 @@ const fetchPostsForThread = (id, threadElement) => {
           const formElement = threadElement.querySelector('form.reply-form');
           if (formElement) {
             // If the reply form is there, append above it
+            console.log("form");
             threadElement.insertBefore(myPostElement, formElement);
           }
           else {
             // Otherwise chuck it on the end
+            console.log("no form");
             threadElement.append(myPostElement);
           }
 
@@ -232,6 +269,7 @@ const fetchPostsForThread = (id, threadElement) => {
     })
     .then(() => {
       // Add a reply form if, not already added
+      console.log("adding reply");
       addReplyFormIfNeeded(threadElement, id);
     })
     .catch(error => console.log(error));
@@ -258,7 +296,7 @@ const addReplyFormIfNeeded = (threadElement, id) => {
       const input = replyForm.getElementsByClassName("reply-text-field");
 
       // return if empty
-      if(input[0].value.length == 0) {
+      if (input[0].value.length == 0) {
         return;
       }
       else {
@@ -333,16 +371,90 @@ const submitNewPost = (post, id, threadElement) => {
   fetch(`http://localhost:7777/api/threads/${id}/posts`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({user: post.user, text:post.text})
+    body: post.stringify()
   })
     .then(response => response.json())
     .then(() => {
-      // TODO refresh the posts
-      console.log("refresh");
+      console.log("refresh posts");
       fetchPostsForThread(id, threadElement);
     })
     .catch(error => console.log(error));
+};
 
+// Starts the refresh timer, fetches posts for id every 10 seconds
+const startRefreshTimer = (id, threadElement) => {
+  refreshTimer = setTimeout(() => {
+    // console.log("start timer");
+    // Fetch posts
+    fetchPostsForThread(id, threadElement);
 
+    // Call self every 10 seconds
+    startRefreshTimer(id, threadElement);
+  }, 10000);
+};
+
+// Stops the refresh timer
+const stopRefreshTimer = () => {
+  // console.log("Stopping timer");
+  clearTimeout(refreshTimer);
+};
+
+// Simply toggles the new thread form to show or hide
+const toggleNewThreadForm = () => {
+  console.log("toggle form");
+  if (document.getElementById('new-thread-block').classList.contains('hidden')) {
+    document.getElementById("forum-block").classList.add('hidden');
+    document.getElementById("new-thread-block").classList.remove('hidden');
+  }
+  else {
+    document.getElementById("forum-block").classList.remove('hidden');
+    document.getElementById("new-thread-block").classList.add('hidden');
+  }
+};
+
+// Creates a new thread using the new thread form
+const createNewThread = () => {
+
+  // Setup
+  const title = document.getElementById('thread-title-field').value;
+  const icon = '\u{1F600}'; // Same icon for everyone, being lazy here... maybe add it as a bonus challenge!
+  const id = Thread.threadList.length + 1; // Get the number of current threads, add 1
+
+  const myNewThread = new Thread(title, icon, currentUser.username, id);
+
+  //Create the post within the thread
+  const postText = document.getElementById('thread-text-field').value;
+
+  const myNewPost = new Post(postText, currentUser.username, currentUser.name);
+
+  // Add post to the thread
+  myNewThread.addPost(myNewPost);
+
+  // POST the new thread
+  postNewThread(id, myNewThread);
+
+  // Clear form fields
+  document.getElementById('thread-title-field').value = "";
+  document.getElementById('thread-text-field').value = "";
+}
+
+const postNewThread = (id, thread) => {
+  console.log("Posting new thread");
+
+  fetch(`http://localhost:7777/api/threads`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: thread.stringifyLatest()
+  })
+    .then(response => response.json())
+    .then(() => {
+      // TODO refresh the thread list
+      console.log("refresh thread list");
+      fetchThreads();
+    })
+    .catch(error => console.log(error));
+
+  // Show the forum, hide the form
+  toggleNewThreadForm();
 
 };
