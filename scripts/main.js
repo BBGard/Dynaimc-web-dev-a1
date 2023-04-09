@@ -195,21 +195,22 @@ const fetchThreads = () => {
     })
     .then(data => {
       // // Populate the thread list
+      let index = 0;
+
       data.forEach(thread => {
+        index++;
+        // console.log(`Data length: ${data.length}`);
+        const uList = Array.from(threadList.children);
+        // console.log(`UL length: ${uList.length}`);
+        // console.log(`index: ${index}`);
 
-        //TODO somewhere here? Check for username match and add a delete button
-
-        // Check if the thread already exists
-        if (Array.from(threadList.children).some(
-          elem => elem.querySelector('.thread-title').textContent
-            === thread.thread_title)) {
-          // If thread exists, return
-          console.log("Thread exists already");
+        if( uList.length === data.length) {
+          console.log("Length match");
           return;
         }
         else {
           // Create a new thread
-          let myThread = new Thread(thread.thread_title, thread.icon, thread.user, thread.id);
+          const myThread = new Thread(thread.thread_title, thread.icon, thread.user, thread.id);
 
           // Append thread to thread list
           threadList.append(myThread.toDOM());
@@ -219,6 +220,48 @@ const fetchThreads = () => {
     })
     .catch(error => console.log(error));
 };
+
+// const fetchThreads = () => {
+
+//   console.log("Fetching threads");
+//   fetch('http://localhost:7777/api/threads')
+//     .then(response => {
+//       if (!response.ok) {
+//         // Catches any http 4xx or 5xx errors
+//         throw new Error("Error fetching threads. Check the address or connection.");
+//       }
+//       else {
+//         return response.json();
+//       }
+//     })
+//     .then(data => {
+//       // // Populate the thread list
+//       data.forEach(thread => {
+
+//         console.log(`Data length: ${data.length}`);
+//         const uList = Array.from(threadList.children);
+//         console.log(`UL length: ${uList.length}`);
+
+//         // Check if the thread already exists
+//         if (Array.from(threadList.children).some(
+//           elem => elem.querySelector('.thread-title').textContent
+//             === thread.thread_title)) {
+//           // If thread exists, return
+//           console.log("Thread exists already");
+//           return;
+//         }
+//         else {
+//           // Create a new thread
+//           const myThread = new Thread(thread.thread_title, thread.icon, thread.user, thread.id);
+
+//           // Append thread to thread list
+//           threadList.append(myThread.toDOM());
+//         }
+
+//       });
+//     })
+//     .catch(error => console.log(error));
+// };
 
 // Fetches all of the posts for a particular thread
 const fetchPostsForThread = (id, threadElement) => {
@@ -240,7 +283,6 @@ const fetchPostsForThread = (id, threadElement) => {
       // Check if that post is already shown in the forum, if not add it
       data.forEach(post => {
         index++;
-        const postId = myThread.postList.length + 1;
         const myPost = new Post(post.text, post.user, post.name);
 
         // Check if myPost is already in currentPostList
@@ -469,6 +511,9 @@ const createNewThread = () => {
   // POST the new thread
   postNewThread(id, myNewThread, postText);
 
+  // Add to DOM
+  threadList.append(myNewThread.toDOM());
+
   // Clear form fields
   document.getElementById('thread-title-field').value = "";
   document.getElementById('thread-text-field').value = "";
@@ -491,7 +536,7 @@ const postNewThread = (id, thread, firstPost) => {
     .then(response => response.json())
     .then(() => {
       console.log("refresh thread list");
-      fetchThreads();
+      // fetchThreads();
     })
     .catch(error => console.log(error));
 
