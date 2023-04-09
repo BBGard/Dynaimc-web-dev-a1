@@ -108,8 +108,13 @@ const setupForum = () => {
   threadList.addEventListener('click', (event) => {
     event.preventDefault();
 
+
     // Check if the click event originated from a thread title element
     if (event.target.classList.contains("thread-title")) {
+       //TODO See if any other threads are open and close them
+       // There is a memory leak here when multiple threads are opened
+       // Too many timers can be created and not properly destroyed
+
       // Get the index of the clicked thread title
       let index = Array.from(event.target.parentNode.parentNode.children).indexOf(event.target.parentNode);
       // Hide or show the posts
