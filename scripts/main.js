@@ -94,7 +94,7 @@ const setupForum = () => {
   // Setup listener on "Create Thread" button in new thread form
   document.getElementById('new-thread-form').addEventListener('submit', (event) => {
     event.preventDefault();
-    createNewThread();
+    createNewThreadFromForm();
 
   }, false);
 
@@ -128,17 +128,15 @@ const setupForum = () => {
         postListElement.classList.remove('hidden');
         console.log("Posts were hidden, showing");
 
-        // Fetch the posts from the server
-        // fetchPostsForThread(id, postListElement);
         // Trigger 10 second timer to refresh posts
-        // startRefreshTimer(id, postListElement);
+        startRefreshTimer(id);
         //TODO re enable this
       }
       else {
         postListElement.classList.add('hidden');
         console.log("posts where showing, hiding now");
         // Stop the refresh timer
-        // stopRefreshTimer();
+        stopRefreshTimer();
       }
     }
   }, false);
@@ -223,7 +221,7 @@ const fetchThreads = () => {
           threadList.append(threadElement);
 
           // Fetch the posts
-          fetchPostsForThread(myThread);
+          fetchPostsForThread(myThread.id);
         }
 
       });
@@ -232,14 +230,19 @@ const fetchThreads = () => {
 };
 
 // Fetches all of the posts for a particular thread
-const fetchPostsForThread = (myThread) => {
+const fetchPostsForThread = (id) => {
   // Get a list of current posts in the thread
+  // const currentPostList = Array.from(myThread.postList);
+  // console.log("currentPostLis");
+  // console.log(currentPostList);
+
+  const myThread = Thread.threadList[id-1];
   const currentPostList = Array.from(myThread.postList);
 
-  console.log(`Fetching posts for thread: ${myThread.id}`);
+  console.log(`Fetching posts for thread: ${id}`);
 
   // Fetch
-  fetchPosts(myThread.id)
+  fetchPosts(id)
     .then(data => {
       console.log(`Got ${data.length} posts`);
 
@@ -271,7 +274,7 @@ const fetchPostsForThread = (myThread) => {
           myPostElement.classList.add('post'); // Add some styling
 
           // Check if we have a form element
-          const formElement = document.querySelector(`#thread-${myThread.id} .reply-form`);
+          const formElement = document.querySelector(`#thread-${id} .reply-form`);
 
           if (formElement) {
             // If the reply form is there, append post above it
@@ -281,11 +284,11 @@ const fetchPostsForThread = (myThread) => {
           else {
             // Otherwise chuck it on the end
             console.log("no form");
-            const threadElement = document.querySelector(`#thread-${myThread.id}`);
+            const threadElement = document.querySelector(`#thread-${id}`).querySelector('ul');
             threadElement.append(myPostElement);
           }
 
-          // Add post to the thrads postList
+          // Add post to the threads postList
           myThread.postList.push(myPost);
         }
       })
@@ -294,14 +297,16 @@ const fetchPostsForThread = (myThread) => {
       // Add a reply form if, not already added
       // Called here so we only add it once
       console.log("adding reply");
-      addReplyFormIfNeeded(myThread);
+      addReplyFormIfNeeded(myThread.id);
     })
     .catch(error => console.log(error));
 
 };
 
 // Checks if reply form exists, adds one if not
-const addReplyFormIfNeeded = (threadElement, id) => {
+const addReplyFormIfNeeded = (id) => {
+  const threadElement = document.querySelector(`#thread-${id}`).querySelector('ul');
+
   if (threadElement.querySelector('.reply-form')) {
     // Form exists
     return;
@@ -334,7 +339,7 @@ const addReplyFormIfNeeded = (threadElement, id) => {
         input[0].value = "";
 
         // Try to post it
-        submitNewPost(post, id, threadElement);
+        submitNewPost(post, id);
       }
     }, false);
 
@@ -343,7 +348,7 @@ const addReplyFormIfNeeded = (threadElement, id) => {
       deleteButton.addEventListener('click', (event) => {
         event.preventDefault();
 
-        deleteThread(id, threadElement);
+        deleteThread(id);
       });
     }
 
@@ -415,7 +420,7 @@ const fetchPosts = (id) => {
 
 
 // Attempts to POST a new post to the correct thread
-const submitNewPost = (post, id, threadElement) => {
+const submitNewPost = (post, id) => {
 
   fetch(`http://localhost:7777/api/threads/${id}/posts`, {
     method: 'POST',
@@ -425,20 +430,20 @@ const submitNewPost = (post, id, threadElement) => {
     .then(response => response.json())
     .then(() => {
       console.log("refresh posts");
-      fetchPostsForThread(id, threadElement);
+      fetchPostsForThread(id);
     })
     .catch(error => console.log(error));
 };
 
 // Starts the refresh timer, fetches posts for id every 10 seconds
-const startRefreshTimer = (id, threadElement) => {
+const startRefreshTimer = (id) => {
   refreshTimer = setTimeout(() => {
     // console.log("start timer");
     // Fetch posts
-    fetchPostsForThread(id, threadElement);
+    fetchPostsForThread(id);
 
     // Call self every 10 seconds
-    startRefreshTimer(id, threadElement);
+    startRefreshTimer(id);
   }, 10000);
 };
 
@@ -462,7 +467,7 @@ const toggleNewThreadForm = () => {
 };
 
 // Creates a new thread using the new thread form
-const createNewThread = () => {
+const createNewThreadFromForm = () => {
 
   // Setup
   const title = document.getElementById('thread-title-field').value;
@@ -477,8 +482,10 @@ const createNewThread = () => {
   // POST the new thread
   postNewThread(id, myNewThread, postText);
 
-  // Add to DOM
-  threadList.append(myNewThread.toDOM());
+  // Append thread to thread list
+  const threadElement = myNewThread.toDOM();
+  threadElement.setAttribute('id', `thread-${id}`);
+  threadList.append(threadElement);
 
   // Clear form fields
   document.getElementById('thread-title-field').value = "";
@@ -502,7 +509,7 @@ const postNewThread = (id, thread, firstPost) => {
     .then(response => response.json())
     .then(() => {
       console.log("refresh thread list");
-      // fetchThreads();
+      fetchPostsForThread(id);
     })
     .catch(error => console.log(error));
 
@@ -511,7 +518,7 @@ const postNewThread = (id, thread, firstPost) => {
 };
 
 // Deletes a forum thread
-const deleteThread = (id, threadElement) => {
+const deleteThread = (id) => {
   console.log(`Deleting thread at id ${id}`);
 
   fetch(`http://localhost:7777/api/threads/${id}`, {
@@ -525,6 +532,7 @@ const deleteThread = (id, threadElement) => {
       if (response.ok) {
         console.log('Post deleted successfully');
         //Remove from DOM
+        const threadElement = document.querySelector(`#thread-${id}`).querySelector('ul');
         threadElement.parentNode.remove(threadElement);
         // Stop refresh timer
         stopRefreshTimer();
