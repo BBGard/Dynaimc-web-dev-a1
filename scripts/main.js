@@ -198,8 +198,6 @@ const fetchThreads = () => {
     })
     .then(data => {
       // // Populate the thread list
-      // console.log("Populating thread_list");
-      // console.log(data);
       data.forEach(thread => {
 
         //TODO somewhere here? Check for username match and add a delete button
@@ -225,6 +223,7 @@ const fetchThreads = () => {
     .catch(error => console.log(error));
 };
 
+// Fetches all of the posts for a particular thread
 const fetchPostsForThread = (id, threadElement) => {
   // Get the thread being referenced
   const myThread = Thread.threadList[id - 1];
@@ -234,20 +233,16 @@ const fetchPostsForThread = (id, threadElement) => {
 
   console.log(`Fetching posts for thread: ${id}`);
 
+  // Fetch
   fetchPosts(id)
     .then(data => {
-      // Create post, attach to correct thread, hide
       console.log(`Got ${data.length} posts`);
 
       let index = 0;
 
+      // Check if that post is already shown in the forum, if not add it
       data.forEach(post => {
         index++;
-        // console.log("debugs:");
-        // console.log(`index: ${index}`);
-        // console.log(`data length: ${data.length}`);
-        // console.log(`postList.length: ${myThread.postList.length}`);
-        // console.log("---------------------------------------");
         const postId = myThread.postList.length + 1;
         const myPost = new Post(post.text, post.user, post.name);
 
@@ -261,12 +256,13 @@ const fetchPostsForThread = (id, threadElement) => {
         const sameButDifferent = myThread.postList.length < data.length
           && myThread.postList.length < index;
 
+        // If the post is already shown, return
         if (postExists && !sameButDifferent) {
           console.log("post exists");
           return;
         }
         else {
-
+          // Add it to the DOM
           const myPostElement = myPost.toDOM();
           myPostElement.classList.add('post'); // Add some styling
 
@@ -284,17 +280,14 @@ const fetchPostsForThread = (id, threadElement) => {
             threadElement.append(myPostElement);
           }
 
+          // Add post to the thrads postList
           myThread.postList.push(myPost);
-
         }
-
-
-
-
       })
     })
     .then(() => {
       // Add a reply form if, not already added
+      // Called here so we only add it once
       console.log("adding reply");
       addReplyFormIfNeeded(threadElement, id);
     })
@@ -304,13 +297,12 @@ const fetchPostsForThread = (id, threadElement) => {
 
 // Checks if reply form exists, adds one if not
 const addReplyFormIfNeeded = (threadElement, id) => {
-
-
   if (threadElement.querySelector('.reply-form')) {
+    // Form exists
     return;
   }
   else {
-
+    // Create the form and add it to the post
     const replyForm = createReplyFormElement();
     threadElement.append(replyForm);
 
