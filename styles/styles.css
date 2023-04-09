@@ -421,7 +421,7 @@ input, button, select, textarea {
   box-shadow: 0 0 5px var(--color-green);
 }
 
-.reply-button {
+.reply-button, .delete-button {
   margin: 0 auto;
   min-width: fit-content;
   max-width: 250px;
@@ -443,6 +443,19 @@ input, button, select, textarea {
   box-shadow: 0 0 5px var(--color-green);
   background-color: var(--color-darkgreen);
 }
+
+.delete-button {
+  display: block;
+  background: var(--color-red);
+  margin-top: 0.25rem;
+}
+
+.delete-button:hover {
+  box-shadow: 0 0 5px var(--color-red);
+  background-color: var(--color-darkred);
+}
+
+
 /* ------------ END Post Reply Form -------------- */
 
 /* New Thread Form */

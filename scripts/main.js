@@ -131,9 +131,6 @@ const setupForum = () => {
         // Stop the refresh timer
         stopRefreshTimer();
       }
-
-      // Fetch the posts from the server
-      // fetchPostsForThread(id, threadElement);
     }
   }, false);
 
@@ -303,12 +300,14 @@ const addReplyFormIfNeeded = (threadElement, id) => {
   }
   else {
     // Create the form and add it to the post
-    const replyForm = createReplyFormElement();
+    const replyForm = createReplyFormElement(id);
     threadElement.append(replyForm);
 
-    // Add click listener to the reply button
+    // Add click listener to the reply button and delete button
     const replyButton = replyForm.querySelector('.reply-button');
+    const deleteButton = replyForm.querySelector('.delete-button');
 
+    // Reply
     replyButton.addEventListener('click', (event) => {
       event.preventDefault();
       // Get the value of the input box
@@ -330,11 +329,21 @@ const addReplyFormIfNeeded = (threadElement, id) => {
         submitNewPost(post, id, threadElement);
       }
     }, false);
+
+    // Delete Thread
+    if(deleteButton != null) {
+      deleteButton.addEventListener('click', (event) => {
+        event.preventDefault();
+
+        deleteThread(id, threadElement);
+      });
+    }
+
   }
 };
 
 // Creates a reply form to attach to a post
-const createReplyFormElement = () => {
+const createReplyFormElement = (id) => {
   // Form
   const form = document.createElement('form');
   form.classList.add('reply-form');
@@ -365,6 +374,19 @@ const createReplyFormElement = () => {
   button.classList.add('reply-button');
   button.value = "Post";
   formGroup.append(button);
+
+  // Check if the current user is the thread creator
+  // Add delete button if so
+  // Get the thread being referenced
+  const myThread = Thread.threadList[id - 1];
+
+  if(myThread.user === currentUser.username) {
+    const deleteButton = document.createElement('input');
+    deleteButton.type = 'button';
+    deleteButton.classList.add('delete-button');
+    deleteButton.value = "Delete Thread";
+    formGroup.append(deleteButton);
+  }
 
   return form;
 };
@@ -414,7 +436,7 @@ const startRefreshTimer = (id, threadElement) => {
 
 // Stops the refresh timer
 const stopRefreshTimer = () => {
-  // console.log("Stopping timer");
+  console.log("Stopping timer");
   clearTimeout(refreshTimer);
 };
 
@@ -444,11 +466,6 @@ const createNewThread = () => {
   //Create the post within the thread
   const postText = document.getElementById('thread-text-field').value;
 
-  //const myNewPost = new Post(postText, currentUser.username, currentUser.name);
-
-  // Add post to the thread
-  //myNewThread.addPost(myNewPost);
-
   // POST the new thread
   postNewThread(id, myNewThread, postText);
 
@@ -473,7 +490,6 @@ const postNewThread = (id, thread, firstPost) => {
   })
     .then(response => response.json())
     .then(() => {
-      // TODO refresh the thread list
       console.log("refresh thread list");
       fetchThreads();
     })
@@ -481,5 +497,29 @@ const postNewThread = (id, thread, firstPost) => {
 
   // Show the forum, hide the form
   toggleNewThreadForm();
+};
 
+// Deletes a forum thread
+const deleteThread = (id, threadElement) => {
+  console.log(`Deleting thread at id ${id}`);
+
+  fetch(`http://localhost:7777/api/threads/${id}`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      user: currentUser.username
+    })
+  })
+    .then(response => {
+      if (response.ok) {
+        console.log('Post deleted successfully');
+        //Remove from DOM
+        threadElement.parentNode.remove(threadElement);
+        // Stop refresh timer
+        stopRefreshTimer();
+      } else {
+        console.error('Error deleting post');
+      }
+    })
+    .catch(error => console.log(error));
 };
