@@ -73,8 +73,6 @@ const threadList = document.getElementById("thread-list");
 // Refresh timer, for refreshing forum posts
 let refreshTimer;
 
-// Local posts object
-let localPostList;
 
 // Hides login and displays forum page
 const setupForum = () => {
@@ -200,8 +198,8 @@ const fetchThreads = () => {
     })
     .then(data => {
       // // Populate the thread list
-      console.log("Populating thread_list");
-      console.log(data);
+      // console.log("Populating thread_list");
+      // console.log(data);
       data.forEach(thread => {
 
         //TODO somewhere here? Check for username match and add a delete button
@@ -229,7 +227,10 @@ const fetchThreads = () => {
 
 const fetchPostsForThread = (id, threadElement) => {
   // Get the thread being referenced
-  let myThread = Thread.threadList[id - 1];
+  const myThread = Thread.threadList[id - 1];
+
+  // Get a list of current posts in the thread
+  const currentPostList = Array.from(myThread.postList);
 
   console.log(`Fetching posts for thread: ${id}`);
 
@@ -237,39 +238,43 @@ const fetchPostsForThread = (id, threadElement) => {
     .then(data => {
       // Create post, attach to correct thread, hide
       console.log(`Got ${data.length} posts`);
-      // console.log(data);
+
+      let index = 0;
+
       data.forEach(post => {
+        index++;
+        // console.log("debugs:");
+        // console.log(`index: ${index}`);
+        // console.log(`data length: ${data.length}`);
+        // console.log(`postList.length: ${myThread.postList.length}`);
+        // console.log("---------------------------------------");
+        const postId = myThread.postList.length + 1;
+        const myPost = new Post(post.text, post.user, post.name);
 
-        // Count post elements
-        const postCount = threadElement.querySelectorAll('li').length;
-        console.log(`Post elements: ${postCount}`);
-        console.log(`Thread posts: ${myThread.postList.length}`);
-        console.log(myThread.postList);
+        // Check if myPost is already in currentPostList
+        const postExists = currentPostList.some((post) => {
+          return post.text === myPost.text && post.user === myPost.user
+          && post.name === myPost.name;
+        });
 
-        // Check if the post already exists
-        const postList = document.querySelectorAll('.post-content');
+        // This is a hack that allows posting the same message, dirty but it works
+        const sameButDifferent = myThread.postList.length < data.length
+          && myThread.postList.length < index;
 
-        // if (Array.from(postList).some(elem => elem.textContent
-        //     === post.text)) { // TODO And check name?
-        //   // If post exists, return
-        //   return;
-        // }
-        if(myThread.postList.length === data.length) {
-          console.log("Same posts");
+        if (postExists && !sameButDifferent) {
+          console.log("post exists");
           return;
         }
         else {
-          // Create a new post
-          //TODO fix suing first post text on reply??
-          let myPost = new Post(post.text, post.user, post.name);
-          let myPostElement = myPost.toDOM();
+
+          const myPostElement = myPost.toDOM();
           myPostElement.classList.add('post'); // Add some styling
 
-          // Add the post to the thread
+          // Check if we have a form element
           const formElement = threadElement.querySelector('.reply-form');
 
           if (formElement) {
-            // If the reply form is there, append above it
+            // If the reply form is there, append post above it
             console.log("form");
             threadElement.insertBefore(myPostElement, formElement);
           }
@@ -280,7 +285,12 @@ const fetchPostsForThread = (id, threadElement) => {
           }
 
           myThread.postList.push(myPost);
+
         }
+
+
+
+
       })
     })
     .then(() => {
@@ -294,6 +304,8 @@ const fetchPostsForThread = (id, threadElement) => {
 
 // Checks if reply form exists, adds one if not
 const addReplyFormIfNeeded = (threadElement, id) => {
+
+
   if (threadElement.querySelector('.reply-form')) {
     return;
   }

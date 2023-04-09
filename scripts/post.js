@@ -3,7 +3,6 @@ export class Post {
     this.text = text;
     this.user = username;
     this.name = name;
-    // this.id = id;
   }
 
   // returns a list element representing the post
