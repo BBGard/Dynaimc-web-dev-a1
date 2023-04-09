@@ -118,20 +118,23 @@ const setupForum = () => {
       // Get the index of the clicked thread title
       let index = Array.from(event.target.parentNode.parentNode.children).indexOf(event.target.parentNode);
       // Hide or show the posts
-      let threadElement = threadList.getElementsByTagName('ul')[index];
+      // let threadElement = threadList.getElementsByTagName('ul')[index];
       let id = index + 1; // The post id for fetching
 
-      if (threadElement.classList.contains('hidden')) {
-        threadElement.classList.remove('hidden');
+      // Get the ul holding the posts
+      const postListElement = event.target.parentNode.querySelector('ul');
+
+      if (postListElement.classList.contains('hidden')) {
+        postListElement.classList.remove('hidden');
         console.log("Posts were hidden, showing");
 
         // Fetch the posts from the server
-        fetchPostsForThread(id, threadElement);
+        fetchPostsForThread(id, postListElement);
         // Trigger 10 second timer to refresh posts
-        startRefreshTimer(id, threadElement);
+        startRefreshTimer(id, postListElement);
       }
       else {
-        threadElement.classList.add('hidden');
+        postListElement.classList.add('hidden');
         console.log("posts where showing, hiding now");
         // Stop the refresh timer
         stopRefreshTimer();
