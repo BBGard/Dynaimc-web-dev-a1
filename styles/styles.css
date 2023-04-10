@@ -505,9 +505,24 @@ label {
   .menu {
     display: none;
   }
+
+  .menu.responsive {
+    /* display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vw;
+    background-color: var(--color-darkblue); */
+  }
+
   .burger {
     display: block;
+    position: absolute;
     cursor: pointer;
+    right: 0;
+    top: 0;
+    margin: 1rem;
   }
   .burger span {
     display: block;

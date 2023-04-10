@@ -24,6 +24,17 @@ export const setupForum = () => {
   document.getElementById("forum-block").classList.remove('hidden');  // Display the empty forum block
   document.getElementById("welcome-box").textContent += `${currentUser.username}!`;   // Show logged in username
 
+  // Hamburger menu
+  document.querySelector('.burger').addEventListener('click', (event) => {
+    event.preventDefault();
+    if(document.querySelector('menu').classList.contains('responsive')) {
+      document.querySelector('.menu').classList.remove('responsive');
+    }
+    else {
+      document.querySelector('.menu').classList.add('responsive');
+    }
+  })
+
   // Add event listener to the 'new thread' button
   document.getElementById('new-thread-butt').addEventListener('click', (event) => {
     event.preventDefault();
