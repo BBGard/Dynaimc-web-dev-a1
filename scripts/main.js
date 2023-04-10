@@ -495,9 +495,7 @@ const stopRefreshTimer = (id) => {
 
 const refreshPosts = (id) => {
   // Get the current thread from state
-  console.log(`id: ${id}`);
-  console.log(state.threads[id]);
-  const currentThread = state.threads[id];
+  const currentThread = state.threads.find(thread => thread && thread.id === id);
 
   // Fetch the posts for the thread from the server
   fetchPostsForThread(id)
