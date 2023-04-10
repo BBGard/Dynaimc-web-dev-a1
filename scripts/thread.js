@@ -17,6 +17,9 @@ export class Thread {
     Thread.threadList.push(this);
   }
 
+  addPost(post) {
+    this.postList.push(post);
+ }
   // Returns a list item (li) DOM element representing the thread
   toDOM() {
     const html = document.createElement('li');

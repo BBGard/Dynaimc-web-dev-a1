@@ -24,6 +24,17 @@ export const setupForum = () => {
   document.getElementById("forum-block").classList.remove('hidden');  // Display the empty forum block
   document.getElementById("welcome-box").textContent += `${currentUser.username}!`;   // Show logged in username
 
+  // Hamburger menu
+  document.querySelector('.burger').addEventListener('click', (event) => {
+    event.preventDefault();
+    if(document.querySelector('menu').classList.contains('responsive')) {
+      document.querySelector('.menu').classList.remove('responsive');
+    }
+    else {
+      document.querySelector('.menu').classList.add('responsive');
+    }
+  })
+
   // Add event listener to the 'new thread' button
   document.getElementById('new-thread-butt').addEventListener('click', (event) => {
     event.preventDefault();
@@ -87,7 +98,9 @@ export const setupForum = () => {
 };
 
 
-// Try to fetch threads
+/**
+ * Fetches threads from the server (hardcoded server address)
+ */
 const fetchThreads = () => {
 
   console.log("Fetching threads");
@@ -102,55 +115,62 @@ const fetchThreads = () => {
       }
     })
     .then(data => {
-      // // Populate the thread list
-
-      data.forEach(thread => {
-        const threadsInDOM = Array.from(threadList.children);
-
-        // Check the id of the thread, increase our maxId counter if necessary
-        maxId = thread.id > maxId ? thread.id : maxId;
-
-        if( threadsInDOM.length === data.length) {
-          console.log("Length match");
-          return;
-        }
-        else {
-          // Create a new thread
-          const newThread = new Thread(thread.thread_title, thread.icon, thread.user, thread.id);
-
-          // Append thread to thread list
-          const threadElement = newThread.toDOM();
-          threadElement.setAttribute('id', `thread-${thread.id}`);
-          threadList.append(threadElement);
-
-          // Fetch the posts
-          fetchPostsForThread(newThread.id);
-        }
-
-      });
+      populateThreads(data);  // Populate the threads
     })
     .catch(error => console.log(error));
 };
 
-// Fetches all of the posts for a particular thread
+/**
+ * Populates the thread list with threads from the server
+ * @param {Array} data - An array of thread objects
+ */
+const populateThreads = (data) => {
+
+  data.forEach(thread => {
+
+    // Create a new thread
+    // console.log(`MaxID: ${maxId}`);
+    // console.log(`threadID: ${thread.id}`);
+    const newThread = new Thread(thread.thread_title, thread.icon, thread.user, thread.id);
+
+    // Append thread to thread list
+    const threadElement = newThread.toDOM();
+    threadElement.setAttribute('id', `thread-${thread.id}`);
+    threadList.append(threadElement);
+
+    // Check the id of the thread, increase our maxId counter if necessary
+    maxId = thread.id > maxId ? thread.id : maxId;
+
+    // Fetch the posts for the thread
+    fetchPostsForThread(newThread.id);
+
+  });
+};
+
+/**
+ * Fetches all of the posts for a particular thread and adds them to the DOM
+ * @param {number} id
+ */
 const fetchPostsForThread = (id) => {
+  console.log(`Fetching posts for thread: ${id}`);
 
   // Get the thread with matching id
   const myThread = Thread.threadList.find(thread => thread.id === id);
-  // console.log(Thread.threadList);
-  // console.log(`id: ${id}`);
-  // console.log("My thread");
-  // console.log(myThread);
 
   // Get a list of current posts in the thread
   const currentPostList = Array.from(myThread.postList);
-  // console.log("currentPostLis");
-  // console.log(currentPostList);
-
-  console.log(`Fetching posts for thread: ${id}`);
 
   // Fetch
-  fetchPosts(id)
+  fetch(`http://localhost:7777/api/threads/${id}/posts`)
+    .then(response => {
+      if (!response.ok) {
+        // Catches any http 4xx or 5xx errors
+        throw new Error("Error fetching posts. Check the address or connection.");
+      }
+      else {
+        return response.json();
+      }
+    })
     .then(data => {
       console.log(`Got ${data.length} posts`);
 
@@ -247,7 +267,7 @@ const addReplyFormIfNeeded = (id) => {
         input[0].value = "";
 
         // Try to post it
-        submitNewPost(post, id);
+        postNewPost(post, id);
       }
     }, false);
 
@@ -312,51 +332,6 @@ const createReplyFormElement = (id) => {
   return form;
 };
 
-// Fetches posts for a specified thread id
-const fetchPosts = (id) => {
-  return fetch(`http://localhost:7777/api/threads/${id}/posts`)
-    .then(response => {
-      if (!response.ok) {
-        // Catches any http 4xx or 5xx errors
-        throw new Error("Error fetching posts. Check the address or connection.");
-      }
-      else {
-        return response.json();
-      }
-    });
-}
-
-
-// Attempts to POST a new post to the correct thread
-const submitNewPost = (post, id) => {
-
-  fetch(`http://localhost:7777/api/threads/${id}/posts`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: post.stringify()
-  })
-    .then(response => response.json())
-    .then(() => {
-      console.log("refresh posts");
-      fetchPostsForThread(id);
-    })
-    .catch(error => console.log(error));
-};
-
-
-// Simply toggles the new thread form to show or hide
-const toggleNewThreadForm = () => {
-  console.log("toggle form");
-  if (document.getElementById('new-thread-block').classList.contains('hidden')) {
-    document.getElementById("forum-block").classList.add('hidden');
-    document.getElementById("new-thread-block").classList.remove('hidden');
-  }
-  else {
-    document.getElementById("forum-block").classList.remove('hidden');
-    document.getElementById("new-thread-block").classList.add('hidden');
-  }
-};
-
 // Creates a new thread using the new thread form
 const createNewThreadFromForm = () => {
 
@@ -365,6 +340,9 @@ const createNewThreadFromForm = () => {
   const icon = '\u{1F600}'; // Same icon for everyone, being lazy here... maybe add it as a bonus challenge!
   // const id = Thread.threadList.length + 1; // Get the number of current threads, add 1
   const id = maxId + 1;
+  maxId = id;
+  console.log("New threead");
+  console.log(`maxID: ${maxId}`);
   console.log(`Thread id: ${id}`);
   const myNewThread = new Thread(title, icon, currentUser.username, id);
 
@@ -383,6 +361,36 @@ const createNewThreadFromForm = () => {
   document.getElementById('thread-title-field').value = "";
   document.getElementById('thread-text-field').value = "";
 }
+
+
+// Simply toggles the new thread form to show or hide
+const toggleNewThreadForm = () => {
+  console.log("toggle form");
+  if (document.getElementById('new-thread-block').classList.contains('hidden')) {
+    document.getElementById("forum-block").classList.add('hidden');
+    document.getElementById("new-thread-block").classList.remove('hidden');
+  }
+  else {
+    document.getElementById("forum-block").classList.remove('hidden');
+    document.getElementById("new-thread-block").classList.add('hidden');
+  }
+};
+
+// Attempts to POST a new post to the correct thread
+const postNewPost = (post, id) => {
+
+  fetch(`http://localhost:7777/api/threads/${id}/posts`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: post.stringify()
+  })
+    .then(response => response.json())
+    .then(() => {
+      console.log("refresh posts");
+      fetchPostsForThread(id);
+    })
+    .catch(error => console.log(error));
+};
 
 const postNewThread = (id, thread, firstPost) => {
   console.log("Posting new thread");
@@ -413,6 +421,7 @@ const postNewThread = (id, thread, firstPost) => {
 const deleteThread = (id) => {
   console.log(`Deleting thread at id ${id}`);
   if(maxId === id) { maxId--;} // reduce maxId if required
+  console.log(`maxId after delete: ${maxId}`);
 
   fetch(`http://localhost:7777/api/threads/${id}`, {
     method: 'DELETE',
@@ -428,7 +437,7 @@ const deleteThread = (id) => {
         const threadElement = document.querySelector(`#thread-${id}`).querySelector('ul');
         threadElement.parentNode.remove(threadElement);
         // Stop refresh timer
-        stopRefreshTimer();
+        stopRefreshTimer(id);
       } else {
         console.error('Error deleting post');
       }
@@ -442,9 +451,6 @@ const handleTitleClick = (target) => {
 
     // Check if the click event originated from a thread title element
     if (target.classList.contains("thread-title")) {
-      //TODO Fix possible timer memeory leak?
-      // If multiple threads area opened at once, then closed in random order
-      // some timers remain
 
      // Get the thread id
      const elementId = target.parentNode.getAttribute('id');
