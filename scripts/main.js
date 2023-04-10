@@ -150,7 +150,16 @@ const fetchPostsForThread = (id) => {
   const currentPostList = Array.from(myThread.postList);
 
   // Fetch
-  fetchPosts(id)
+  fetch(`http://localhost:7777/api/threads/${id}/posts`)
+    .then(response => {
+      if (!response.ok) {
+        // Catches any http 4xx or 5xx errors
+        throw new Error("Error fetching posts. Check the address or connection.");
+      }
+      else {
+        return response.json();
+      }
+    })
     .then(data => {
       console.log(`Got ${data.length} posts`);
 
@@ -211,114 +220,6 @@ const fetchPostsForThread = (id) => {
 
 };
 
-// const fetchPostsForThread = (id) => {
-//   console.log(`Fetching posts for thread: ${id}`);
-
-//   // Get the thread with matching id
-//   const myThread = Thread.threadList.find(thread => thread.id === id);
-
-//   // Get a list of current posts in the thread
-//   const currentPostList = Array.from(myThread.postList);
-
-//   // Fetch
-//   fetchPosts(id)
-//     .then(data => {
-//       console.log(`Got ${data.length} posts`);
-//       console.log(`currentList: ${currentPostList.length}`);
-
-//       // Check if that post is already shown in the forum, if not add it
-//       data.forEach((post, i) => {
-//         const myPost = new Post(post.text, post.user, post.name);
-//         const domPosts = Array.from(document.querySelector(`#thread-${id}`).querySelector('ul').children);
-
-//         // Check if matching post is found and
-//         // const postExists = currentPostList.some((post) => {
-//         //     return post.text === myPost.text && post.user === myPost.user
-//         //     && post.name === myPost.name && i<= domPosts.length;
-//         //   });
-
-//         // if(postExists) {
-//         //   console.log("Post exists");
-//         //   return;
-//         // }
-//         if(i < domPosts.length) {
-//           console.log("Less than DOM");
-//           if(domPosts[i].textContent.includes(post.text)) {
-//             console.log("text match");
-//             return;
-//           }
-//         }
-//         else {
-//           // Add it to the DOM
-//           const myPostElement = myPost.toDOM();
-//           myPostElement.classList.add('post'); // Add some styling
-
-//           // Check if we have a form element
-//           const formElement = document.querySelector(`#thread-${id} .reply-form`);
-
-//           if (formElement) {
-//             // If the reply form is there, append post above it
-//             console.log("form");
-//             formElement.insertAdjacentElement('beforebegin', myPostElement);
-//           }
-//           else {
-//             // Otherwise chuck it on the end
-//             console.log("no form");
-//             const threadElement = document.querySelector(`#thread-${id}`).querySelector('ul');
-//             threadElement.append(myPostElement);
-//           }
-
-//           // Add post to the threads postList
-//           myThread.postList.push(myPost);
-//         }
-//       })
-//       // for(let i=0; i<data.length; i++) {
-//       //   console.log('here');
-//       //   if(currentPostList.length > 0 && data[i].text === currentPostList[i].text) {
-//       //     console.log("same post");
-//       //     return;
-//       //   }
-//       //   else {
-//       //     console.log('create post');
-//       //     const myPost = new Post(data[i].text, data[i].user, data[i].name);
-
-//       //     // Add it to the DOM
-//       //     const myPostElement = myPost.toDOM();
-//       //     myPostElement.classList.add('post'); // Add some styling
-
-//       //     // Check if we have a form element
-//       //     const formElement = document.querySelector(`#thread-${id} .reply-form`);
-
-//       //     if (formElement) {
-//       //       // If the reply form is there, append post above it
-//       //       console.log("form");
-//       //       formElement.insertAdjacentElement('beforebegin', myPostElement);
-//       //     }
-//       //     else {
-//       //       // Otherwise chuck it on the end
-//       //       console.log("no form");
-//       //       const threadElement = document.querySelector(`#thread-${id}`).querySelector('ul');
-//       //       threadElement.append(myPostElement);
-//       //     }
-
-//       //     // Add post to the threads postList
-//       //     myThread.postList.push(myPost);
-//       //   }
-
-
-//       // }
-
-//     })
-//     .then(() => {
-//       // Add a reply form if, not already added
-//       // Called here so we only add it once
-//       console.log("adding reply");
-//       addReplyFormIfNeeded(myThread.id);
-//     })
-//     .catch(error => console.log(error));
-
-// };
-
 // Checks if reply form exists, adds one if not
 const addReplyFormIfNeeded = (id) => {
   const threadElement = document.querySelector(`#thread-${id}`).querySelector('ul');
@@ -355,7 +256,7 @@ const addReplyFormIfNeeded = (id) => {
         input[0].value = "";
 
         // Try to post it
-        submitNewPost(post, id);
+        postNewPost(post, id);
       }
     }, false);
 
@@ -420,51 +321,6 @@ const createReplyFormElement = (id) => {
   return form;
 };
 
-// Fetches posts for a specified thread id
-const fetchPosts = (id) => {
-  return fetch(`http://localhost:7777/api/threads/${id}/posts`)
-    .then(response => {
-      if (!response.ok) {
-        // Catches any http 4xx or 5xx errors
-        throw new Error("Error fetching posts. Check the address or connection.");
-      }
-      else {
-        return response.json();
-      }
-    });
-}
-
-
-// Attempts to POST a new post to the correct thread
-const submitNewPost = (post, id) => {
-
-  fetch(`http://localhost:7777/api/threads/${id}/posts`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: post.stringify()
-  })
-    .then(response => response.json())
-    .then(() => {
-      console.log("refresh posts");
-      fetchPostsForThread(id);
-    })
-    .catch(error => console.log(error));
-};
-
-
-// Simply toggles the new thread form to show or hide
-const toggleNewThreadForm = () => {
-  console.log("toggle form");
-  if (document.getElementById('new-thread-block').classList.contains('hidden')) {
-    document.getElementById("forum-block").classList.add('hidden');
-    document.getElementById("new-thread-block").classList.remove('hidden');
-  }
-  else {
-    document.getElementById("forum-block").classList.remove('hidden');
-    document.getElementById("new-thread-block").classList.add('hidden');
-  }
-};
-
 // Creates a new thread using the new thread form
 const createNewThreadFromForm = () => {
 
@@ -494,6 +350,36 @@ const createNewThreadFromForm = () => {
   document.getElementById('thread-title-field').value = "";
   document.getElementById('thread-text-field').value = "";
 }
+
+
+// Simply toggles the new thread form to show or hide
+const toggleNewThreadForm = () => {
+  console.log("toggle form");
+  if (document.getElementById('new-thread-block').classList.contains('hidden')) {
+    document.getElementById("forum-block").classList.add('hidden');
+    document.getElementById("new-thread-block").classList.remove('hidden');
+  }
+  else {
+    document.getElementById("forum-block").classList.remove('hidden');
+    document.getElementById("new-thread-block").classList.add('hidden');
+  }
+};
+
+// Attempts to POST a new post to the correct thread
+const postNewPost = (post, id) => {
+
+  fetch(`http://localhost:7777/api/threads/${id}/posts`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: post.stringify()
+  })
+    .then(response => response.json())
+    .then(() => {
+      console.log("refresh posts");
+      fetchPostsForThread(id);
+    })
+    .catch(error => console.log(error));
+};
 
 const postNewThread = (id, thread, firstPost) => {
   console.log("Posting new thread");
@@ -554,9 +440,6 @@ const handleTitleClick = (target) => {
 
     // Check if the click event originated from a thread title element
     if (target.classList.contains("thread-title")) {
-      //TODO Fix possible timer memeory leak?
-      // If multiple threads area opened at once, then closed in random order
-      // some timers remain
 
      // Get the thread id
      const elementId = target.parentNode.getAttribute('id');
