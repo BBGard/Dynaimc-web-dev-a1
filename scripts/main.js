@@ -1,88 +1,30 @@
 import { Thread } from "./thread.js";
 import { Post } from "./post.js";
+import { currentUser } from "./login.js";
 
-/* --------------------------- Login Variables ------------------------------- */
-// For showing user error messages on the login form
-const error_message = document.getElementById('error-message');
+/***
+ * This script controls the forum functionality
+ * Author: Benjamin Gardiner
+ */
 
-// An object to hold the current user
-let currentUser = {
-  username: "",
-  name: ""
-};
-
-/* --------------------------- Login Functions ------------------------------- */
-
-// Setup the event listener on the submit button of the login form
-document.getElementById('login-form').addEventListener('submit', (event) => {
-
-  console.log(`Trying to login`);
-  currentUser.username = document.getElementById('username-field').value;
-
-  if (currentUser.username == null || currentUser.username === undefined) { return; } // If null or undefined username, exit.
-
-  // Check if username exists on the server
-  fetch(`http://localhost:7777/api/users/`)
-    .then(response => {
-      if (!response.ok) {
-        // Catches any http 4xx or 5xx errors
-        throw new Error("Error fetching users. Check the address or connection");
-      }
-      else {
-        return response.json();
-      }
-    })
-    .then(data => {
-
-      // Iterate over data and look for matching username
-      for (let i = 0; i < data.length; i++) {
-        if (data[i].username === currentUser.username) {
-          // Finish setting up our currentUSer object
-          currentUser.name = data[i].name;
-
-          // Load the forum!
-          console.log("user found...loading forum...");
-          setupForum();
-          break;
-        }
-
-        // If we reach the end, no user found - show error
-        if (i === data.length - 1) {
-          console.log("User not found");
-          error_message.classList.remove('hidden');
-          error_message.textContent = "We couldn't find that username. Please try again.";
-        }
-
-      }
-
-    })
-    .catch(error => console.log(error));
-
-  event.preventDefault();
-}, false);
-
-/* --------------------------- END Login Functions ------------------------------- */
-/* --------------------------- ------------------- ------------------------------- */
-
-/* --------------------------- Forum Variables ------------------------------- */
-/*  Declared here for neatness, keeping in mind hoisting will pull them up    */
-
-// Get thread list element from page
+// Get thread list 'ul' element from page - for appending threads
 const threadList = document.getElementById("thread-list");
 
+// Tracks the max id value of threads on the server
+let maxId = 0;
+
 // Refresh timer, for refreshing forum posts
-let refreshTimer;
+// let refreshTimer;
+// Object to store active refresh timers - for refreshing posts
+let refreshTimers = {};
 
 
-// Hides login and displays forum page
-const setupForum = () => {
+// Hides login, displays forum page, sets up listeners, fetches threads
+export const setupForum = () => {
   document.getElementById("login-block").classList.add('hidden'); // Hide login form
   document.getElementById("header").classList.remove('hidden');   // Display header and navbar
-  document.getElementById("forum-block").classList.remove('hidden');  // Display empty forum block
+  document.getElementById("forum-block").classList.remove('hidden');  // Display the empty forum block
   document.getElementById("welcome-box").textContent += `${currentUser.username}!`;   // Show logged in username
-
-
-  fetchThreads(); // Try to fetch forum threads
 
   // Add event listener to the 'new thread' button
   document.getElementById('new-thread-butt').addEventListener('click', (event) => {
@@ -104,41 +46,10 @@ const setupForum = () => {
     toggleNewThreadForm();
   }, false);
 
-  // Add a click listener to the thread list to catch title clicks
+  // Listener to catch thread title clicks
   threadList.addEventListener('click', (event) => {
     event.preventDefault();
-
-
-    // Check if the click event originated from a thread title element
-    if (event.target.classList.contains("thread-title")) {
-       //TODO See if any other threads are open and close them
-       // There is a memory leak here when multiple threads are opened
-       // Too many timers can be created and not properly destroyed
-
-      // Get the index of the clicked thread title
-      let index = Array.from(event.target.parentNode.parentNode.children).indexOf(event.target.parentNode);
-      // Hide or show the posts
-      // let threadElement = threadList.getElementsByTagName('ul')[index];
-      let id = index + 1; // The post id for fetching
-
-      // Get the ul holding the posts
-      const postListElement = event.target.parentNode.querySelector('ul');
-
-      if (postListElement.classList.contains('hidden')) {
-        postListElement.classList.remove('hidden');
-        console.log("Posts were hidden, showing");
-
-        // Trigger 10 second timer to refresh posts
-        startRefreshTimer(id);
-        //TODO re enable this
-      }
-      else {
-        postListElement.classList.add('hidden');
-        console.log("posts where showing, hiding now");
-        // Stop the refresh timer
-        stopRefreshTimer();
-      }
-    }
+    handleTitleClick(event.target);
   }, false);
 
   // Add some annoying popups to the header links
@@ -172,21 +83,12 @@ const setupForum = () => {
 
   }, false);
 
+  // Finally, fetch the threads
+  fetchThreads();
+
 };
 
 
-// Clear any error messages on input field focus
-document.getElementById('username-field').addEventListener('focus', (event) => {
-  event.preventDefault();
-  error_message.classList.add('hidden');
-  error_message.textContent = "";
-}, false);
-
-
-
-
-
-/* --------------------------- Forum Functions ------------------------------- */
 // Try to fetch threads
 const fetchThreads = () => {
 
@@ -207,21 +109,25 @@ const fetchThreads = () => {
       data.forEach(thread => {
         const uList = Array.from(threadList.children);
 
+        // Check the id of the thread, increase our maxId counter if necessary
+        maxId = thread.id > maxId ? thread.id : maxId;
+        console.log(`MaxId: ${maxId}`);
+
         if( uList.length === data.length) {
           console.log("Length match");
           return;
         }
         else {
           // Create a new thread
-          const myThread = new Thread(thread.thread_title, thread.icon, thread.user, thread.id);
+          const newThread = new Thread(thread.thread_title, thread.icon, thread.user, thread.id);
 
           // Append thread to thread list
-          const threadElement = myThread.toDOM();
+          const threadElement = newThread.toDOM();
           threadElement.setAttribute('id', `thread-${thread.id}`);
           threadList.append(threadElement);
 
           // Fetch the posts
-          fetchPostsForThread(myThread.id);
+          fetchPostsForThread(newThread.id);
         }
 
       });
@@ -231,13 +137,18 @@ const fetchThreads = () => {
 
 // Fetches all of the posts for a particular thread
 const fetchPostsForThread = (id) => {
+
+  // Get the thread with matching id
+  const myThread = Thread.threadList.find(thread => thread.id === id);
+  // console.log(Thread.threadList);
+  // console.log(`id: ${id}`);
+  // console.log("My thread");
+  // console.log(myThread);
+
   // Get a list of current posts in the thread
-  // const currentPostList = Array.from(myThread.postList);
+  const currentPostList = Array.from(myThread.postList);
   // console.log("currentPostLis");
   // console.log(currentPostList);
-
-  const myThread = Thread.threadList[id-1];
-  const currentPostList = Array.from(myThread.postList);
 
   console.log(`Fetching posts for thread: ${id}`);
 
@@ -391,7 +302,7 @@ const createReplyFormElement = (id) => {
   // Check if the current user is the thread creator
   // Add delete button if so
   // Get the thread being referenced
-  const myThread = Thread.threadList[id - 1];
+  const myThread = Thread.threadList.find(thread => thread.id === id);
 
   if(myThread.user === currentUser.username) {
     const deleteButton = document.createElement('input');
@@ -435,23 +346,6 @@ const submitNewPost = (post, id) => {
     .catch(error => console.log(error));
 };
 
-// Starts the refresh timer, fetches posts for id every 10 seconds
-const startRefreshTimer = (id) => {
-  refreshTimer = setTimeout(() => {
-    // console.log("start timer");
-    // Fetch posts
-    fetchPostsForThread(id);
-
-    // Call self every 10 seconds
-    startRefreshTimer(id);
-  }, 10000);
-};
-
-// Stops the refresh timer
-const stopRefreshTimer = () => {
-  console.log("Stopping timer");
-  clearTimeout(refreshTimer);
-};
 
 // Simply toggles the new thread form to show or hide
 const toggleNewThreadForm = () => {
@@ -472,8 +366,9 @@ const createNewThreadFromForm = () => {
   // Setup
   const title = document.getElementById('thread-title-field').value;
   const icon = '\u{1F600}'; // Same icon for everyone, being lazy here... maybe add it as a bonus challenge!
-  const id = Thread.threadList.length + 1; // Get the number of current threads, add 1
-
+  // const id = Thread.threadList.length + 1; // Get the number of current threads, add 1
+  const id = maxId + 1;
+  console.log(`Thread id: ${id}`);
   const myNewThread = new Thread(title, icon, currentUser.username, id);
 
   //Create the post within the thread
@@ -520,6 +415,7 @@ const postNewThread = (id, thread, firstPost) => {
 // Deletes a forum thread
 const deleteThread = (id) => {
   console.log(`Deleting thread at id ${id}`);
+  if(maxId === id) { maxId--;} // reduce maxId if required
 
   fetch(`http://localhost:7777/api/threads/${id}`, {
     method: 'DELETE',
@@ -528,7 +424,7 @@ const deleteThread = (id) => {
       user: currentUser.username
     })
   })
-    .then(response => {
+    .then(response =>{
       if (response.ok) {
         console.log('Post deleted successfully');
         //Remove from DOM
@@ -541,4 +437,51 @@ const deleteThread = (id) => {
       }
     })
     .catch(error => console.log(error));
+};
+
+// Gets the id attribute of the clicked thread, shows/hides the posts,
+// Stops/starts the refresh timer
+const handleTitleClick = (target) => {
+
+    // Check if the click event originated from a thread title element
+    if (target.classList.contains("thread-title")) {
+      //TODO Fix possible timer memeory leak?
+      // If multiple threads area opened at once, then closed in random order
+      // some timers remain
+
+     // Get the thread id
+     const elementId = target.parentNode.getAttribute('id');
+     const id = parseInt(elementId.split("-")[1]);
+
+     // Get the ul holding the posts
+     const postListElement = target.parentNode.querySelector('ul');
+
+     if (postListElement.classList.contains('hidden')) {
+       postListElement.classList.remove('hidden');
+       console.log("Posts were hidden, showing");
+
+       // Trigger 10 second timer to refresh posts
+       startRefreshTimer(id);
+     }
+     else {
+       postListElement.classList.add('hidden');
+       console.log("posts where showing, hiding now");
+       // Stop the refresh timer
+       stopRefreshTimer(id);
+     }
+   }
+};
+
+// Starts a refresh timer for a thread at id, fetches posts for id every 10 seconds
+const startRefreshTimer = (id) => {
+  refreshTimers[id] = setInterval(() => {
+    console.log(`refresh timer id: ${id}`);
+    fetchPostsForThread(id)
+  }, 10000)
+};
+
+// Stops the refresh timer
+const stopRefreshTimer = (id) => {
+  console.log(`Stopping timer id: ${id}`);
+  clearInterval(refreshTimers[id]);
 };

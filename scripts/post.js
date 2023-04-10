@@ -1,11 +1,16 @@
+/***
+ * This class describes a post on a user forum
+ * Author: Benjamin Gardiner
+ */
+
 export class Post {
   constructor(text, username, name) {
-    this.text = text;
-    this.user = username;
-    this.name = name;
+    this.text = text;       // The string message of the post
+    this.user = username;   // username of the user creating the post
+    this.name = name;       // Real name of the user creating the post
   }
 
-  // returns a list element representing the post
+  // Returns a list item (li) DOM element representing the post
   toDOM() {
     const html = document.createElement('li');
 
@@ -22,7 +27,7 @@ export class Post {
     return html;
   }
 
-  // Return the JSON stringified version of this post
+  // Returns the JSON stringified version of this post
   stringify() {
     return JSON.stringify(
       {
