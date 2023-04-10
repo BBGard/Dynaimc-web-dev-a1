@@ -10,26 +10,26 @@ import { currentUser } from "./login.js";
 // Get thread list 'ul' element from page - for appending threads
 const threadList = document.getElementById("thread-list");
 
-// Tracks the max id value of threads on the server
-let maxId = 0;
-
 // Object to store active refresh timers - for refreshing posts
 let refreshTimers = {};
 
-// State object holding the current state of the forum
+// State object holding the current state of the forum - array of Thread objects, maxId to track thread ids
 const state = {
   threads: [],
   maxId: 0
 };
 
-// Hides login, displays forum page, sets up listeners, fetches threads
+/**
+ * setupForum
+ * Hides login, displays forum page, sets up listeners, fetches threads
+ */
 export const setupForum = () => {
   document.getElementById("login-block").classList.add('hidden'); // Hide login form
   document.getElementById("header").classList.remove('hidden');   // Display header and navbar
   document.getElementById("forum-block").classList.remove('hidden');  // Display the empty forum block
   document.getElementById("welcome-box").textContent += `${currentUser.username}!`;   // Show logged in username
 
-  // Hamburger menu
+  // Hamburger menu functionality
   document.querySelector('.burger').addEventListener('click', (event) => {
     event.preventDefault();
     if (document.querySelector('menu').classList.contains('responsive')) {
@@ -47,7 +47,7 @@ export const setupForum = () => {
 
   }, false);
 
-  // Setup listener on "Create Thread" button in new thread form
+  //Listener for "Create Thread" button in new thread form
   document.getElementById('new-thread-form').addEventListener('submit', (event) => {
     event.preventDefault();
     createNewThreadFromForm();
@@ -69,13 +69,13 @@ export const setupForum = () => {
   // Add some annoying popups to the header links
   document.getElementById('navbar').addEventListener('click', (event) => {
     event.preventDefault();
-    // console.log(event.target.tagName);
 
     // return if not clicking a specific element
     if (event.target.tagName === 'UL') {
       return;
     }
 
+    // Figure out what was clicked, display annoying message...sorry
     switch (event.target.textContent) {
       case "Front-end":
       case "The Front-end Forum":
@@ -97,24 +97,21 @@ export const setupForum = () => {
 
   }, false);
 
-  // Finally, fetch the threads
+  // Finally, fetch the threads...the magic begins
   fetchThreads()
   .then(data => {
-    // state.threads = data;
-    // populateThreads(data);  // Populate the threads
     data.forEach(thread => {
-      createThreadAndAddToDOM(thread);
+      createThreadAndAddToDOM(thread);  // Add threads to page
     })
-
   })
-  .catch(error => console.log(error));;
-
-  console.log("State of the app:");
-  console.log("-----------------------");
-  console.log(state);
+  .catch(error => console.log(error));
 
 };
 
+/**
+ * Fetches threads from the API - Note hardcoded API used here, change to make code reuseable
+ * @returns Promise that should resolve to JSON data representing threads
+ */
 const fetchThreads = () => {
   console.log("Fetching threads");
   return fetch('http://localhost:7777/api/threads')
@@ -342,27 +339,15 @@ const createReplyFormElement = (id) => {
   return form;
 };
 
-// Creates a new thread using the new thread form
+/**
+ * Creates a new thread using the fields from new-thread-form
+ */
 const createNewThreadFromForm = () => {
 
-  // Setup
+  // Get thread elements
   const title = document.getElementById('thread-title-field').value;
   const icon = '\u{1F600}'; // Same icon for everyone, being lazy here... maybe add it as a bonus challenge!
-  // const id = Thread.threadList.length + 1; // Get the number of current threads, add 1
-  const id = maxId + 1;
-  maxId = id;
-  console.log("New threead");
-  // console.log(`maxID: ${maxId}`);
-  // console.log(`Thread id: ${id}`);
-  // const myNewThread = new Thread(title, icon, currentUser.username, id);
-
-  // //Create the post within the thread
   const postText = document.getElementById('thread-text-field').value;
-
-  // // Append thread to thread list
-  // const threadElement = myNewThread.toDOM();
-  // threadElement.setAttribute('id', `thread-${id}`);
-  // threadList.append(threadElement);
 
   // POST the new thread
   postNewThread(currentUser.username, title, icon, postText);
@@ -432,8 +417,6 @@ const postNewThread = (user, title, icon, text) => {
 // Deletes a forum thread
 const deleteThread = (id) => {
   console.log(`Deleting thread at id ${id}`);
-  if (maxId === id) { maxId--; } // reduce maxId if required
-  console.log(`maxId after delete: ${maxId}`);
 
   fetch(`http://localhost:7777/api/threads/${id}`, {
     method: 'DELETE',
