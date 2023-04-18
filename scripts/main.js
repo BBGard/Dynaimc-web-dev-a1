@@ -27,7 +27,7 @@ export const setupForum = () => {
   document.getElementById("login-block").classList.add('hidden'); // Hide login form
   document.getElementById("header").classList.remove('hidden');   // Display header and navbar
   document.getElementById("forum-block").classList.remove('hidden');  // Display the empty forum block
-  document.getElementById("welcome-box").textContent += `${currentUser.username}!`;   // Show logged in username
+  document.getElementById("welcome-text").textContent += `${currentUser.username}!`;   // Show logged in username
 
   // Hamburger menu functionality
   document.querySelector('.burger').addEventListener('click', (event) => {
@@ -88,9 +88,13 @@ export const setupForum = () => {
       case "Contact":
         window.alert("This link would take you to the contact page in a real app!");
         break;
+      case "Logout":
+        window.alert("This link would log the user out in a real app!");
+        break;
       default:
-        if (event.target.textContent.includes("Welcome")) {
-          window.alert("This link would log the user out in a real app!");
+        if (event.target.id === "welcome-text") {
+          console.log(event.target);
+          window.alert("This link would open the profile page in a real app!");
         }
         break;
     }

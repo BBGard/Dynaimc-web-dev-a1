@@ -105,7 +105,7 @@ nav {
   font-size: 1.2rem;
 }
 
-#welcome-box {
+#logout-box {
   font-size: 0.8rem;
   background: -webkit-linear-gradient(var(--color-darkgreen), var(--color-blue));
   padding: 0.5rem;
@@ -117,6 +117,12 @@ nav {
   font-weight: 700;
   text-decoration: underline;
   text-underline-offset: 2px;
+}
+
+#welcome-text {
+  font-size: 0.8rem;
+  text-align: right;
+  margin: 0.5rem;
 }
 
 .burger {
@@ -249,7 +255,7 @@ input, button, select, textarea {
   background: var(--color-green);
   color: var(--color-white);
   border: solid var(--color-white) 2px ;
-  box-shadow: 2px 2px 5px var(--color-black);
+  /* box-shadow: 2px 2px 5px var(--color-black); */
   border-radius: 5px;
   cursor: pointer;
   transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
@@ -260,7 +266,7 @@ input, button, select, textarea {
 }
 
 .submit-button:hover {
-  box-shadow: 0 0 5px var(--color-green);
+  /* box-shadow: 0 0 5px var(--color-green); */
   background-color: var(--color-darkgreen);
 }
 
@@ -301,15 +307,15 @@ input, button, select, textarea {
   background: var(--color-green);
   color: var(--color-white);
   /* border: solid var(--color-darkgreen) 2px ; */
-  box-shadow: 2px 2px 5px var(--color-darkblue-alpha);
-  border-radius: 15px;
+  /* box-shadow: 2px 2px 5px var(--color-darkblue-alpha); */
+  border-radius: 10px;
   cursor: pointer;
   transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 
 }
 
 #new-thread-butt:hover {
-  box-shadow: 0 0 5px var(--color-green);
+  /* box-shadow: 0 0 5px var(--color-green); */
   background-color: var(--color-darkgreen);
 }
 
@@ -432,7 +438,7 @@ input, button, select, textarea {
   background: var(--color-green);
   color: var(--color-white);
   /* border: solid var(--color-darkgreen) 2px ; */
-  box-shadow: 2px 2px 5px var(--color-darkblue-alpha);
+  /* box-shadow: 2px 2px 5px var(--color-darkblue-alpha); */
   border-radius: 15px;
   cursor: pointer;
   transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
