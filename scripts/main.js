@@ -32,7 +32,7 @@ export const setupForum = () => {
   // Hamburger menu functionality
   document.querySelector('.burger').addEventListener('click', (event) => {
     event.preventDefault();
-    if (document.querySelector('menu').classList.contains('responsive')) {
+    if (document.querySelector('.menu').classList.contains('responsive')) {
       document.querySelector('.menu').classList.remove('responsive');
     }
     else {
@@ -93,7 +93,6 @@ export const setupForum = () => {
         break;
       default:
         if (event.target.id === "welcome-text") {
-          console.log(event.target);
           window.alert("This link would open the profile page in a real app!");
         }
         break;
@@ -244,7 +243,6 @@ const addReplyFormIfNeeded = (id) => {
         return;
       }
       else {
-        console.log("Post reply!");
         // Create a new post
         const post = new Post(input[0].value, currentUser.username, currentUser.name);
 
@@ -369,7 +367,6 @@ const postNewPost = (post, id) => {
   })
     .then(response => response.json())
     .then(() => {
-      console.log("refresh posts");
       refreshPosts(id); // Refresh the posts for the thread
     })
     .catch(error => console.log(error));

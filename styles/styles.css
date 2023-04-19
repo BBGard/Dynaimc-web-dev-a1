@@ -56,13 +56,13 @@ h3 {
 }
 
 header {
-  background: -webkit-linear-gradient(180deg, var(--color-green), var(--color-darkblue));
+  background: var(--color-darkgreen);
   color: var(--color-white);
   height: 5rem;
 }
 
 main {
-  margin: 3% auto ;
+  margin: 3% auto;
 }
 
 /* ------------------------------ Navbar Styling-------------------------------- */
@@ -71,13 +71,26 @@ nav {
   justify-content: space-between;
   align-items: center;
   margin: 0 auto;
-  padding: 1rem 5rem;
+  /* padding: 1rem 5rem;
   text-align: center;
   font-size: 1.8rem;
-  float: right;
+  float: right; */
+  padding: 1rem;
+  font-size: 1.4rem;
 }
 
 .logo {
+  padding: 0.5rem;
+}
+
+.logo a {
+  font-family: var(--font-heading);
+  text-decoration: none;
+  font-size: 1.8rem;
+  color: var(--color-white);
+}
+
+/* .logo {
   position: absolute;
   left: 0;
   padding-top: 1rem;
@@ -88,10 +101,13 @@ nav {
   font-family: var(--font-heading);
   text-decoration: none;
   font-size: 1.8rem;
+} */
+
+.logo a span {
+  color: var(--color-darkblue);
 }
 
 .menu ul {
-  display: flex;
   margin: 0;
   padding: 0;
 }
@@ -125,8 +141,22 @@ nav {
   margin: 0.5rem;
 }
 
-.burger {
+/* .burger {
   display: none;
+} */
+.burger {
+  display: block;
+  font-size: 2rem;
+  color: var(--color-white);
+  cursor: pointer;
+}
+
+.burger span {
+  display: block;
+  width: 30px;
+  height: 4px;
+  margin-bottom: 5px;
+  background-color: var(--color-white);
 }
 
 /* --------------------------- END Navbar Styling -----------------------------*/
@@ -153,7 +183,7 @@ nav {
   color: var(--color-darkblue);
 }
 
-#title span, .logo a span {
+#title span {
   background: -webkit-linear-gradient(var(--color-green), var(--color-blue));
   background-clip: text;
   -webkit-background-clip: text;
@@ -254,7 +284,7 @@ input, button, select, textarea {
   padding: 0.75rem;
   background: var(--color-green);
   color: var(--color-white);
-  border: solid var(--color-white) 2px ;
+  border: solid var(--color-white) 2px;
   /* box-shadow: 2px 2px 5px var(--color-black); */
   border-radius: 5px;
   cursor: pointer;
@@ -351,14 +381,14 @@ input, button, select, textarea {
 }
 
 /* Add border to bottom of last post */
-#latest-posts ul > :last-child {
+#latest-posts ul> :last-child {
   border-bottom: solid 1px var(--color-blue);
   border-radius: 0 0 10px 10px;
 }
 
 /* Curve top border */
-#latest-posts ul > :first-child {
-  border-radius: 10px 10px 0 0 ;
+#latest-posts ul> :first-child {
+  border-radius: 10px 10px 0 0;
 }
 
 .thread a:hover {
@@ -493,49 +523,62 @@ label {
 
 
 /* MEDIA QUERIES */
-/* @media (min-width: 576px) {
-  .container {
-    max-width: 540px;
-
-  }
- }
-
-  @media (min-width: 768px) {
-  .container {
-    max-width: 720px;
-  }
-} */
 
 /* Forum */
-@media (max-width: 768px) {
+@media only screen and (min-width: 768px) {
+  .burger {
+    display: none;
+  }
+
+  .menu {
+    display: flex;
+  }
+
+  .menu ul {
+    display: flex;
+  }
+}
+
+@media only screen and (max-width: 768px) {
   .menu {
     display: none;
   }
 
-  .menu.responsive {
-    /* display: block;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vw;
-    background-color: var(--color-darkblue); */
+  menu ul {
+    display: block;
+    width: 100%;
   }
 
-  .burger {
+  .menu li {
+    margin: 1rem 0;
+    display: block;
+  }
+
+  .menu a {
+    font-size: 1.8rem;
+  }
+
+  .menu.responsive {
     display: block;
     position: absolute;
-    cursor: pointer;
+    top: 5rem;
+    left: 0;
     right: 0;
-    top: 0;
-    margin: 1rem;
+    padding: 1rem;
+    background: var(--color-darkgreen);
+    float: none;
+    height: 100vh;
+    width: 100vw;
+    text-align: center;
   }
-  .burger span {
-    display: block;
-    width: 30px;
-    height: 4px;
-    margin-bottom: 5px;
-    background-color: var(--color-white);
+
+  .menu.responsive li {
+    min-width: 100%;
+    margin: 1rem 0;
+  }
+
+  .menu.responsive a {
+    font-size: 1.8rem;
   }
 
   .submit-button, .cancel-button {
