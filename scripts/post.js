@@ -14,12 +14,12 @@ export class Post {
   toDOM() {
     const html = document.createElement('li');
 
-    const postContent = document.createElement('p');
+    const postContent = document.createElement('p'); // post text
     postContent.textContent = `${this.text}`;
     postContent.classList.add('post-content');
     html.append(postContent);
 
-    const postName = document.createElement('p');
+    const postName = document.createElement('p'); // post author
     postName.textContent = ` - ${this.name}`;
     postName.classList.add('post-name')
     html.append(postName);

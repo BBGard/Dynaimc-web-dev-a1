@@ -19,8 +19,7 @@ export const currentUser = {
 // Setup an event listener on the submit button of the login form
 document.getElementById('login-form').addEventListener('submit', (event) => {
 
-  console.log(`Trying to login`);
-  // Set username to the value from username-field
+  // Set username of the currentUser to the value from username-field
   currentUser.username = document.getElementById('username-field').value;
 
   // If value is null or undefined, return
@@ -46,14 +45,12 @@ document.getElementById('login-form').addEventListener('submit', (event) => {
           currentUser.name = data[i].name;
 
           // Load the forum!
-          console.log("user found...loading forum...");
           setupForum(); // Head over to the "main.js" script
           break;
         }
 
         // If we reach the end, no user found - show error
         if (i === data.length - 1) {
-          console.log("User not found");
           error_message.classList.remove('hidden');
           error_message.textContent = "We couldn't find that username. Please try again.";
         }

@@ -17,6 +17,7 @@ export class Thread {
     Thread.threadList.push(this);
   }
 
+  // Adds a post to the postList for THIS thread
   addPost(post) {
     this.postList.push(post);
  }
@@ -26,18 +27,18 @@ export class Thread {
     html.classList.add('thread'); // Styling
     html.append(this.icon);
 
-    const title = document.createElement('a');
+    const title = document.createElement('a'); // title
     title.textContent = `${this.thread_title}`;
     title.href = `http://localhost:4505/index?id=${this.id}`;
     title.classList.add('thread-title');
     html.append(title);
 
-    const user = document.createElement('p');
+    const user = document.createElement('p'); // author
     user.textContent = `${this.user}`;
     user.classList.add('author');
     html.append(user);
 
-    const posts = document.createElement('ul'); // To hold the threads posts
+    const posts = document.createElement('ul'); // To hold this threads posts
     posts.classList.add('post-list');
     posts.classList.add('hidden');  // Hide posts for now
     html.append(posts);
